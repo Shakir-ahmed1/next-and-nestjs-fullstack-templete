@@ -1,0 +1,35 @@
+services:
+  demo-db:
+    container_name: demo-db
+    image: mariadb:11.0.2
+    restart: unless-stopped
+
+    ports:
+      - "3307:3306" # host:container
+
+    environment:
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ}
+
+    env_file:
+      - ./.env
+
+    volumes:
+      - demo-db-data:/var/lib/mysql
+
+    networks:
+      - demo-db-net
+
+volumes:
+  demo-db-data:
+
+networks:
+  demo-db-net:
+    driver: bridge
+
+
