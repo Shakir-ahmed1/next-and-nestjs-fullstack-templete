@@ -1,40 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Twin Commerce Monorepo
 
-## load environment variables
-set -a; source .env; set +a;
+A modern e-commerce platform with separated frontend and backend.
 
-## Getting Started
+## 🏗️ Architecture
 
+- **Frontend**: Next.js 16 (React 19) - Port 3001
+- **Backend**: NestJS - Port 3000
+- **Database**: MySQL with TypeORM
+- **Auth**: Better-auth
 
-First, run the development server:
+## 📁 Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+├── frontend/    # Next.js UI application
+├── backend/     # NestJS API server
+└── MIGRATION.md # Detailed migration documentation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Quick Start
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18+
+- MySQL 8+
+- npm or pnpm
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Database Setup
+Create a MySQL database:
+```sql
+CREATE DATABASE twin_commerce;
+```
 
-## Learn More
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with your database credentials
+npm run start:dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Backend will run on **http://localhost:3000**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+cp .env.example .env
+# Ensure NEXT_PUBLIC_API_URL points to backend
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Frontend will run on **http://localhost:3001**
 
-## Deploy on Vercel
+## 🔑 Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Backend `.env`
+```env
+DATABASE_URL="mysql://user:password@localhost:3306/twin_commerce"
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Frontend `.env`
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3000/api"
+NEXT_PUBLIC_APP_URL="http://localhost:3001"
+```
+
+## 📚 Documentation
+
+- **[MIGRATION.md](./MIGRATION.md)** - Detailed migration guide from Next.js API routes to NestJS
+- **API Endpoints**: See backend controllers in `backend/src/*/`
+- **Components**: See `frontend/components/`
+
+## 🛠️ Tech Stack
+
+### Frontend
+- Next.js 16 (App Router)
+- React 19
+- TailwindCSS 4
+- React Query (TanStack Query)
+- Better-auth React client
+- Axios
+
+### Backend
+- NestJS
+- TypeORM
+- Better-auth
+- MySQL2
+- Multer (file uploads)
+
+## 📝 Available Scripts
+
+### Backend
+- `npm run start:dev` - Development mode with hot reload
+- `npm run build` - Build for production
+- `npm run start:prod` - Run production build
+
+### Frontend
+- `npm run dev` - Development mode (port 3001)
+- `npm run build` - Build for production
+- `npm run start` - Run production build
+
+## 🔐 Authentication
+
+Uses **better-auth** for authentication:
+- Email/Password signup and login
+- Google OAuth
+- Session management
+- Password reset
+
+## 📦 Features
+
+- ✅ User authentication (email/password + Google)
+- ✅ User profile management
+- ✅ Avatar upload and management
+- ✅ File serving with security checks
+- ✅ Session-based authentication
+- ✅ CORS-enabled API
+
+## 🤝 Contributing
+
+This is a migrated monorepo. See [MIGRATION.md](./MIGRATION.md) for architecture details.
+
+## 📄 License
+
+Private project
