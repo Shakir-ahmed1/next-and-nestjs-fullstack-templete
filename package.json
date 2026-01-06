@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@thallesp/nestjs-better-auth": "^2.2.0"
-  }
-}

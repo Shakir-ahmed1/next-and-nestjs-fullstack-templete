@@ -1,0 +1,117 @@
+services:
+  twin-db:
+    container_name: twin-db
+    image: mariadb:11.0.2
+    volumes:
+      - twin-db-data:/var/lib/mysql
+    restart: unless-stopped
+    environment:
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      PUID: 10
+      PGID: 1000
+      TZ: ${TZ}
+    env_file:
+      - .env
+    networks:
+      - twin-db-net
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  twin-backend:
+    container_name: twin-backend
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile.dev
+      target: development
+    volumes:
+      - ./backend:/usr/src/app
+      - /etc/localtime:/etc/localtime
+      - twin_backend_node_modules:/usr/src/app/node_modules
+      - uploads:/usr/src/app/uploads:rw
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://${DB_USERNAME}:${DB_PASSWORD}@twin-db:3306/${DB_NAME}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      FILE_UPLOAD_BASE_DIR: /usr/src/app/uploads/files/images
+      PORT: 3000
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: npm run start:dev
+    depends_on:
+      twin-db:
+        condition: service_healthy
+    networks:
+      - twin-db-net
+      - twin-backend-net
+      - twin-frontend-net
+    ports:
+      - "3000:3000"
+
+  twin-frontend:
+    container_name: twin-frontend
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile.dev
+      target: development
+    volumes:
+      - ./frontend:/app
+      - /etc/localtime:/etc/localtime
+      - twin_frontend_node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: npm run dev
+    depends_on:
+      - twin-backend
+    networks:
+      - twin-frontend-net
+      - twin-nginx-net
+    ports:
+      - "3001:3001"
+
+  twin-nginx:
+    container_name: twin-nginx
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+    env_file:
+      - .env
+    ports:
+      - "8081:8081"
+    depends_on:
+      - twin-backend
+      - twin-frontend
+    networks:
+      - twin-nginx-net
+      - twin-backend-net
+    volumes:
+      - uploads:/usr/share/nginx/html/uploads:ro
+
+networks:
+  twin-db-net:
+  twin-backend-net:
+  twin-frontend-net:
+  twin-nginx-net:
+
+volumes:
+  twin_backend_node_modules:
+  twin_frontend_node_modules:
+  twin-db-data:
+  uploads:

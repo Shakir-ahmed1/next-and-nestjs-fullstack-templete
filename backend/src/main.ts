@@ -4,8 +4,8 @@ import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth/auth';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, 
-    {bodyParser: false}
+  const app = await NestFactory.create(AppModule,
+    // { bodyParser: false }
   );
   const server = app.getHttpAdapter().getInstance();
 

@@ -19,6 +19,32 @@ A modern e-commerce platform with separated frontend and backend.
 
 ## 🚀 Quick Start
 
+### Option 1: Docker (Recommended)
+
+The easiest way to run the entire stack:
+
+```bash
+# 1. Copy environment file
+cp .env.example .env
+
+# 2. Edit .env with your credentials
+nano .env
+
+# 3. Start all services
+docker-compose up --build
+```
+
+**Access points**:
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:3000/api
+- Nginx: http://localhost (routes to frontend/backend)
+
+See **[DOCKER.md](./DOCKER.md)** for detailed Docker instructions.
+
+---
+
+### Option 2: Manual Setup
+
 ### Prerequisites
 - Node.js 18+
 - MySQL 8+

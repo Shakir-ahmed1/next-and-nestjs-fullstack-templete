@@ -1,0 +1,48 @@
+# Dockerfile for NestJS Backend (Development)
+FROM node:20-alpine AS base
+WORKDIR /usr/src/app
+
+# Development stage
+FROM base AS development
+
+# Alpine node image already has node user (UID 1000, GID 1000)
+# Just ensure proper ownership
+RUN chown -R node:node /usr/src/app
+
+# Install dependencies
+COPY --chown=node:node package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY --chown=node:node . .
+
+# Create uploads directory
+RUN mkdir -p uploads/files/images && \
+    chown -R node:node uploads
+
+USER node
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:dev"]
+
+# Production stage (for future use)
+FROM base AS production
+
+# Use existing node user
+RUN chown -R node:node /usr/src/app
+
+COPY --chown=node:node package*.json ./
+RUN npm ci --only=production
+
+COPY --chown=node:node . .
+
+RUN npm run build && \
+    mkdir -p uploads/files/images && \
+    chown -R node:node uploads
+
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "dist/main"]

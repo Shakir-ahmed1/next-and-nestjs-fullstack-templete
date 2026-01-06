@@ -16,7 +16,7 @@ export async function getSession() {
         }
 
         // Call backend to validate session
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/auth/get-session`, {
+        const response = await fetch(`http://twin-backend:3000/api/auth/get-session`, {
             headers: {
                 Cookie: `better-auth.session_token=${sessionToken.value}`,
             },
@@ -27,7 +27,7 @@ export async function getSession() {
         }
         
         const data = await response.json();
-        console.log(data)
+        // console.log(data)
         return data || null;
     } catch (error) {
         console.error("Error fetching session:", error);

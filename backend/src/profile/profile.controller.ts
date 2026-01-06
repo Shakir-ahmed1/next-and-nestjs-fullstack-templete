@@ -6,6 +6,7 @@ import { FilePurpose } from '../common/enums/file-purpose.enum';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import 'multer';
+import { CustomBody } from 'src/decorators/custom-body.decorator';
 
 @Controller('api/profile')
 export class ProfileController {
@@ -16,11 +17,11 @@ export class ProfileController {
 
     private async getUser(req: any) {
         const a = fromNodeHeaders(req.headers);
-        console.log("HEADERS", a)
+        // console.log("HEADERS", a)
         const session = await auth.api.getSession({
             headers: fromNodeHeaders(req.headers)
         });
-        console.log("SESSION", session) 
+        // console.log("SESSION", session) 
         if (!session) throw new UnauthorizedException();
         return session.user;
     }
@@ -32,7 +33,7 @@ export class ProfileController {
     }
 
     @Put()
-    async updateProfile(@Req() req, @Body() body: { name: string; image: string }) {
+    async updateProfile(@Req() req, @CustomBody() body: { name: string; image: string }) {
         const user = await this.getUser(req);
         return this.profileService.update(user.id, {
             name: body.name,
@@ -43,7 +44,7 @@ export class ProfileController {
 
     @Post('avatar')
     @UseInterceptors(FileInterceptor('image'))
-    async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File, @Body('purpose') purpose: string) {
+    async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File, @CustomBody('purpose') purpose: string) {
         const user = await this.getUser(req);
         const uploadedImage = await this.uploadsService.upload(file, (purpose as FilePurpose) || FilePurpose.AVATAR, user.id);
 

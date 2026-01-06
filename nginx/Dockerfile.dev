@@ -1,0 +1,11 @@
+FROM nginx:alpine
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Create directory for uploads
+RUN mkdir -p /usr/share/nginx/html/uploads
+
+EXPOSE 8081
+
+CMD ["nginx", "-g", "daemon off;"]
