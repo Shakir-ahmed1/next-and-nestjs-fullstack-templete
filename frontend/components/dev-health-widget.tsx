@@ -69,43 +69,66 @@ export default function DevHealthWidget({
     // Determine if there's any failure
     const hasFailure = health.api === "error" || health.db === "error";
 
+    // Determine popup position based on button position
+    const isBottom = position.includes("bottom");
+    const isRight = position.includes("right");
+
+    // Build popup position classes
+    let popupClasses = "fixed z-50 ";
+
+    // Vertical positioning: opposite of button
+    if (isBottom) {
+        popupClasses += "bottom-[88px] "; // 72px (button + gap) + 16px (4 * 4)
+    } else {
+        popupClasses += "top-[88px] ";
+    }
+
+    // Horizontal positioning: same side as button
+    if (isRight) {
+        popupClasses += "right-4";
+    } else {
+        popupClasses += "left-4";
+    }
+
     return (
-        <div className={`fixed z-50 ${positionClasses[position]}`}>
-            {/* Panel */}
+        <>
+            {/* Popup Panel - positioned independently */}
             {open && (
-                <div className="mb-3 w-64 rounded-2xl bg-white shadow-xl border p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold">Dev Health</h3>
-                        <button onClick={() => setOpen(false)}>
-                            <X className="h-4 w-4" />
-                        </button>
-                    </div>
+                <div className={popupClasses}>
+                    <div className="w-64 rounded-2xl bg-white shadow-xl border p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-sm font-semibold">Dev Health</h3>
+                            <button onClick={() => setOpen(false)}>
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
 
-                    <StatusRow label="API" state={health.api} />
-                    <StatusRow label="Database" state={health.db} />
+                        <StatusRow label="API" state={health.api} />
+                        <StatusRow label="Database" state={health.db} />
 
-                    <div className="mt-4">
-                        <p className="text-xs font-medium mb-1">Position</p>
-                        <div className="grid grid-cols-2 gap-1">
-                            {Object.keys(positionClasses).map((p) => (
-                                <button
-                                    key={p}
-                                    onClick={() => setPosition(p as CornerPosition)}
-                                    className={`text-xs rounded-md border px-2 py-1 hover:bg-gray-50 ${position === p ? "bg-gray-100 font-semibold" : ""
-                                        }`}
-                                >
-                                    {p}
-                                </button>
-                            ))}
+                        <div className="mt-4">
+                            <p className="text-xs font-medium mb-1">Position</p>
+                            <div className="grid grid-cols-2 gap-1">
+                                {Object.keys(positionClasses).map((p) => (
+                                    <button
+                                        key={p}
+                                        onClick={() => setPosition(p as CornerPosition)}
+                                        className={`text-xs rounded-md border px-2 py-1 hover:bg-gray-50 ${position === p ? "bg-gray-100 font-semibold" : ""
+                                            }`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Floating Button */}
+            {/* Floating Button - fixed position that never moves */}
             <button
                 onClick={() => setOpen(!open)}
-                className={`h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-colors ${hasFailure
+                className={`fixed z-50 ${positionClasses[position]} h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-colors ${hasFailure
                     ? "bg-red-500 border-red-600 border-2"
                     : "bg-white border border-gray-200 hover:bg-gray-50"
                     }`}
@@ -113,7 +136,7 @@ export default function DevHealthWidget({
             >
                 <Code2 className={`h-6 w-6 ${hasFailure ? "text-white" : ""}`} />
             </button>
-        </div>
+        </>
     );
 }
 

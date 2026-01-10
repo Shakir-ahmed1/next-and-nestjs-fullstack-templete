@@ -72,7 +72,7 @@ Backend will run on **http://localhost:3000**
 cd frontend
 npm install
 cp .env.example .env
-# Ensure NEXT_PUBLIC_API_URL points to backend
+# Ensure PUBLIC_API_URL points to backend
 npm run dev
 ```
 
@@ -89,8 +89,8 @@ GOOGLE_CLIENT_SECRET="your_google_client_secret"
 
 ### Frontend `.env`
 ```env
-NEXT_PUBLIC_API_URL="http://localhost:3000/api"
-NEXT_PUBLIC_APP_URL="http://localhost:3001"
+PUBLIC_API_URL="http://localhost:3000/api"
+PUBLIC_URL="http://localhost:3001"
 ```
 
 ## 📚 Documentation

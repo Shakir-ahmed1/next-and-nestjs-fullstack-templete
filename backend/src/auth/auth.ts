@@ -3,9 +3,9 @@ import { betterAuth } from "better-auth";
 import { createPool } from "mysql2/promise";
 
 export const auth = betterAuth({
-
+    baseURL: 'http://localhost:8081',
     trustedOrigins(request) {
-        return ['http://localhost:3001','http://localhost:8081',]
+        return ['http://localhost:3001', 'http://localhost:8081',]
     },
     database: createPool({
         uri: process.env.DATABASE_URL,
