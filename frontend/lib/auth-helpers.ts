@@ -1,4 +1,5 @@
 // Auth helpers for server components - fetches session from backend API
+import { NEXT_PUBLIC_BACKEND_PORT, NEXT_PUBLIC_NGINX_HOST_NAME, NEXT_PUBLIC_NGINX_PORT } from "@/config";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -14,9 +15,10 @@ export async function getSession() {
         if (!sessionToken) {
             return null;
         }
+        console.log(sessionToken)
 
         // Call backend to validate session
-        const response = await fetch(`http://twin-backend:3000/api/auth/get-session`, {
+        const response = await fetch(`http://${NEXT_PUBLIC_NGINX_HOST_NAME}:${NEXT_PUBLIC_NGINX_PORT}/api/auth/get-session`, {
             headers: {
                 Cookie: `better-auth.session_token=${sessionToken.value}`,
             },
@@ -25,7 +27,7 @@ export async function getSession() {
         if (!response.ok) {
             return null;
         }
-        
+
         const data = await response.json();
         // console.log(data)
         return data || null;

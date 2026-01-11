@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth/auth';
+import { BETTER_AUTH_URI, NEXT_PUBLIC_BACKEND_PORT } from '../config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule,
@@ -10,7 +11,7 @@ async function bootstrap() {
   const server = app.getHttpAdapter().getInstance();
 
   // Handle Better-Auth routes
-  server.all('/api/auth/*path', (req, res) => {
+  server.all(`${BETTER_AUTH_URI}/*path`, (req, res) => {
     // 1. Manually set CORS headers for this specific handler
     const origin = req.headers.origin;
     if (origin) {
@@ -36,6 +37,7 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(NEXT_PUBLIC_BACKEND_PORT);
+  console.log(`Backend is running on port ${NEXT_PUBLIC_BACKEND_PORT}`);
 }
 bootstrap();

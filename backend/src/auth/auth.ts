@@ -1,12 +1,12 @@
 
 import { betterAuth } from "better-auth";
-import { PUBLIC_URL } from "config";
+import { PUBLIC_URL, FRONTEND_PORT } from "config";
 import { createPool } from "mysql2/promise";
 
 export const auth = betterAuth({
     baseURL: PUBLIC_URL,
     trustedOrigins(request) {
-        return ['http://localhost:3001', PUBLIC_URL,]
+        return [PUBLIC_URL, `http://localhost:${FRONTEND_PORT}`]
     },
     database: createPool({
         uri: process.env.DATABASE_URL,

@@ -36,7 +36,7 @@ http {
 
     # Upstream servers
     upstream backend {
-        server ${BACKEND_HOST}:${BACKEND_PORT};
+        server ${BACKEND_HOST}:${NEXT_PUBLIC_BACKEND_PORT};
     }
 
     upstream frontend {
@@ -44,10 +44,7 @@ http {
     }
 
     server {
-        # listen ${NGINX_PORT};
-        # server_name ${NGINX_SERVER_NAME};
-
-        listen 80;
+        listen ${NEXT_PUBLIC_NGINX_PORT};
         server_name localhost;
 
         # API routes - proxy to backend

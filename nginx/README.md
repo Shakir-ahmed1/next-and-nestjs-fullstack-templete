@@ -8,16 +8,16 @@ You can customize the following nginx settings in your `.env` file:
 
 | Variable | Description | Default Value |
 |----------|-------------|---------------|
-| `NGINX_PORT` | The port nginx listens on inside the container | `80` |
+| `NEXT_PUBLIC_NGINX_PORT` | The port nginx listens on inside the container | `80` |
 | `NGINX_SERVER_NAME` | The server name for nginx | `localhost` |
 | `BACKEND_HOST` | The hostname of the backend service | `twin-backend` |
-| `BACKEND_PORT` | The port of the backend service | `3000` |
+| `NEXT_PUBLIC_BACKEND_PORT` | The port of the backend service | `3000` |
 | `FRONTEND_HOST` | The hostname of the frontend service | `twin-frontend` |
 | `FRONTEND_PORT` | The port of the frontend service | `3001` |
 
 ## How It Works
 
-1. **Template File**: `nginx/nginx.conf.template` contains the nginx configuration with environment variable placeholders (e.g., `${NGINX_PORT}`)
+1. **Template File**: `nginx/nginx.conf.template` contains the nginx configuration with environment variable placeholders (e.g., `${NEXT_PUBLIC_NGINX_PORT}`)
 
 2. **Entrypoint Script**: `nginx/docker-entrypoint.sh` runs when the container starts and uses `envsubst` to replace the placeholders with actual environment variable values
 
@@ -29,10 +29,10 @@ To change the nginx port or server name, simply update your `.env` file:
 
 ```bash
 # .env
-NGINX_PORT=8080
+NEXT_PUBLIC_NGINX_PORT=8080
 NGINX_SERVER_NAME=myapp.local
 BACKEND_HOST=twin-backend
-BACKEND_PORT=3000
+NEXT_PUBLIC_BACKEND_PORT=3000
 FRONTEND_HOST=twin-frontend
 FRONTEND_PORT=3001
 ```

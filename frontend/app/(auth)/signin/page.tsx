@@ -69,7 +69,7 @@ export default function SignIn() {
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
           <CardDescription className="text-xs md:text-sm">
-            Enter your email and password below to login to your account
+            Enter your email and password below to login to your account please
           </CardDescription>
         </CardHeader>
         <CardContent>
