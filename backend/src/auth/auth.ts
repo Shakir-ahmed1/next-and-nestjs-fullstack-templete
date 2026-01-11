@@ -1,6 +1,6 @@
 
 import { betterAuth } from "better-auth";
-import { PUBLIC_URL, FRONTEND_PORT } from "config";
+import { PUBLIC_URL, FRONTEND_PORT, DATABASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "config";
 import { createPool } from "mysql2/promise";
 
 export const auth = betterAuth({
@@ -9,7 +9,7 @@ export const auth = betterAuth({
         return [PUBLIC_URL, `http://localhost:${FRONTEND_PORT}`]
     },
     database: createPool({
-        uri: process.env.DATABASE_URL,
+        uri: DATABASE_URL,
         connectionLimit: 10,
         timezone: "Z", // Important to ensure consistent timezone values
     }),
@@ -21,8 +21,8 @@ export const auth = betterAuth({
     },
     socialProviders: {
         google: {
-            clientId: process.env.GOOGLE_CLIENT_ID || "GOOGLE_CLIENT_ID",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "GOOGLE_CLIENT_SECRET",
+            clientId: GOOGLE_CLIENT_ID,
+            clientSecret: GOOGLE_CLIENT_SECRET,
         }
     }
 });

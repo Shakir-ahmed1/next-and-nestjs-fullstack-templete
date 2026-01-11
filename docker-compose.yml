@@ -38,11 +38,11 @@ services:
       - uploads:/usr/src/app/uploads:rw
     environment:
       NODE_ENV: development
-      DATABASE_URL: mysql://${DB_USERNAME}:${DB_PASSWORD}@twin-db:3306/${DB_NAME}
+      DATABASE_URL: mysql://${DB_USERNAME}:${DB_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       FILE_UPLOAD_BASE_DIR: /usr/src/app/uploads/files/images
-      PORT: 3000
+      PORT: ${NEXT_PUBLIC_BACKEND_PORT}
     env_file:
       - .env
     restart: unless-stopped

@@ -1,7 +1,7 @@
 import { Module, Controller, Get, Post, Body } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, InjectRepository } from '@nestjs/typeorm';
-import { dbName, dbPassword, dbUsername } from 'config';
+import { DB_NAME, DB_PASSWORD, DB_PORT, DB_SERVICE_NAME, DB_TYPE, DB_USERNAME } from 'config';
 import { Entity, PrimaryGeneratedColumn, Column, Repository } from 'typeorm';
 import { HealthController } from './lib/health/health.controller';
 import { CustomBody } from './decorators/custom-body.decorator';
@@ -53,15 +53,15 @@ export class AppController {
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         // url: configService.get<string>('DATABASE_URL'),
-        type: 'mysql', // or 'mariadb'
-        host: 'twin-db',
-        port: 3306,
-        username: dbUsername,
-        password: dbPassword,
-        database: dbName,
+        type: DB_TYPE as any, // or 'mariadb'
+        host: DB_SERVICE_NAME,
+        port: DB_PORT,
+        username: DB_USERNAME,
+        password: DB_PASSWORD,
+        database: DB_NAME,
 
         // Add Todo here   
-        entities: [Todo, 
+        entities: [Todo,
           User, Account, Session, Verification, UploadImage
         ],
         synchronize: true, // Auto-creates table
