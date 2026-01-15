@@ -39,7 +39,7 @@ temp.txt
 *.tmp
 
 # Uploads (handled by Docker volumes in production)
-uploads/
+backend/uploads/
 public/files/
 
 # TypeScript
