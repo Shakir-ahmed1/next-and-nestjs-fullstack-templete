@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useUserProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -87,6 +88,18 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+      <Card>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground">Want to update your password?</p>
+            <Link href="/change-password" passHref>
+              <Button variant="default">Change Password</Button>
+            </Link>
+
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

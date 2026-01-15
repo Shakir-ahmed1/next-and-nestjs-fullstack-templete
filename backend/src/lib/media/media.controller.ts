@@ -13,7 +13,7 @@ export class MediaController {
         private configService: ConfigService
     ) { }
 
-    @Get('/api/media/files/*path')
+    @Get('files/*path')
     async getFile(@Req() req: any, @Res({ passthrough: true }) res: Response) {
         // Parse path from URL since @Param('path') might not capture everything cleanly with leading slashes or structure
         const url = new URL(req.url, `http://${req.headers.host}`);

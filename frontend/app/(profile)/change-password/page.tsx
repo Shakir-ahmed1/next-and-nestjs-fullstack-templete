@@ -44,9 +44,9 @@ export default function ChangePassword() {
 
 
         if (error) {
-            toast.error("Please use the link sent to your email");
+            toast.error("Failed to change the password, please try again");
         } else {
-            toast("Password changed succesfully")
+            toast("Password changed successfully")
             router.push('/')
         }
     };
@@ -111,7 +111,7 @@ export default function ChangePassword() {
                             {loading ? (
                                 <Loader2 size={16} className="animate-spin" />
                             ) : (
-                                <p> Send Reset Link To password </p>
+                                <p>Change password</p>
                             )}
                         </Button>
 

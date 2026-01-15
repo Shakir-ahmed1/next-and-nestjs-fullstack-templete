@@ -112,7 +112,7 @@ export default function ResetPassword() {
                             {loading ? (
                                 <Loader2 size={16} className="animate-spin" />
                             ) : (
-                                <p> Send Reset Link To password </p>
+                                <p>Change password</p>
                             )}
                         </Button>
 
