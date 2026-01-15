@@ -1,13 +1,15 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { toNodeHandler } from 'better-auth/node';
-import { auth } from './auth/auth';
+import { auth } from './lib/auth/auth';
 import { BETTER_AUTH_URI, NEXT_PUBLIC_BACKEND_PORT } from '../config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule,
     // { bodyParser: false }
   );
+  app.useGlobalPipes(new ValidationPipe());
   const server = app.getHttpAdapter().getInstance();
 
   // Handle Better-Auth routes

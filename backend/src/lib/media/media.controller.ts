@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Res, NotFoundException, StreamableFile, Req, BadRequestException } from '@nestjs/common';
-import { UploadsService } from '../uploads/uploads.service';
+import { UploadsService } from './uploads/uploads.service';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';

@@ -1,12 +1,12 @@
 import { Controller, Get, Put, Post, Delete, Body, UseInterceptors, UploadedFile, Req, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
-import { UploadsService } from '../uploads/uploads.service';
-import { FilePurpose } from '../common/enums/file-purpose.enum';
+import { UploadsService } from '../media/uploads/uploads.service';
+import { FilePurpose } from '../../common/enums/file-purpose.enum';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import 'multer';
-import { CustomBody } from 'src/decorators/custom-body.decorator';
+import { CustomBody } from '../../decorators/custom-body.decorator';
 
 @Controller('api/profile')
 export class ProfileController {

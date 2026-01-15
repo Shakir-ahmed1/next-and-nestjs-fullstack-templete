@@ -32,10 +32,9 @@ services:
       dockerfile: Dockerfile.dev
       target: development
     volumes:
-      - ./backend:/usr/src/app
+      - ./backend:/usr/src/app:cached   # Mount source code only
       - /etc/localtime:/etc/localtime
-      - twin_backend_node_modules:/usr/src/app/node_modules
-      - uploads:/usr/src/app/uploads:rw
+      - uploads:/usr/src/app/uploads:rw # Keep uploads
     environment:
       NODE_ENV: development
       DATABASE_URL: mysql://${DB_USERNAME}:${DB_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
