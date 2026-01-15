@@ -1,5 +1,4 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
-import { PUBLIC_URL } from 'config';
 import { DataSource } from 'typeorm';
 
 @Controller('api/health')
@@ -8,7 +7,7 @@ export class HealthController {
 
   @Get()
   health() {
-    return { status: 'ok', PUBLIC_URL };
+    return { status: 'ok' };
   }
 
   @Get('db')

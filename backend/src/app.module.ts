@@ -24,9 +24,9 @@ import { DataSource } from "typeorm";
         type: configService.get<any>('DB_TYPE') || 'mysql',
         host: configService.get<string>('DB_SERVICE_NAME'),
         port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME', 'twin_user'),
-        password: configService.get<string>('DB_PASSWORD', 'twin_password'),
-        database: configService.get<string>('DB_NAME', 'twin_commerce'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true, // Auto-creates table. Recommended to disable in production
         dropSchema: false,
@@ -34,6 +34,7 @@ import { DataSource } from "typeorm";
       inject: [ConfigService],
     }),
     AuthModule.forRootAsync({
+      disableGlobalAuthGuard: true,
       isGlobal: true,
       imports: [TypeOrmModule.forFeature([User, Account, Session, Verification])],
       inject: [ConfigService, DataSource],

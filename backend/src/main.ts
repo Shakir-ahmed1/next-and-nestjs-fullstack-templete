@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { NEXT_PUBLIC_BACKEND_PORT } from '../config';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,8 +13,13 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   });
+  const configService = app.get(ConfigService);
 
-  await app.listen(NEXT_PUBLIC_BACKEND_PORT);
-  console.log(`Backend is running on port ${NEXT_PUBLIC_BACKEND_PORT}`);
+  // Read your backend port from environment
+  const port = configService.get<number>('NEXT_PUBLIC_BACKEND_PORT', 3000);
+
+
+  await app.listen(port);
+  console.log(`Backend is running on port ${port}`);
 }
 bootstrap();

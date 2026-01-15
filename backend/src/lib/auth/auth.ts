@@ -5,12 +5,12 @@ import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { User } from "../users/entities/user.entity";
 
-export const getBetterAuthConfig = (config: ConfigService, dataSource: DataSource) => {
+export const getBetterAuthConfig = (configService: ConfigService, dataSource: DataSource) => {
     return betterAuth({
-        baseURL: config.get('PUBLIC_URL'),
+        baseURL: configService.get('PUBLIC_URL'),
         trustedOrigins: [
-            config.get('PUBLIC_URL', ''),
-            `http://localhost:${config.get('FRONTEND_PORT')}`,
+            configService.get('PUBLIC_URL', ''),
+            `http://localhost:${configService.get('FRONTEND_PORT')}`,
         ],
         database: typeormAdapter(dataSource),
         emailAndPassword: {
@@ -21,11 +21,11 @@ export const getBetterAuthConfig = (config: ConfigService, dataSource: DataSourc
         },
         socialProviders: {
             google: {
-                clientId: config.get('GOOGLE_CLIENT_ID', ''),
-                clientSecret: config.get('GOOGLE_CLIENT_SECRET', ''),
+                clientId: configService.get('GOOGLE_CLIENT_ID', ''),
+                clientSecret: configService.get('GOOGLE_CLIENT_SECRET', ''),
             }
         },
         // Secret is required for production, good to have it anyway
-        secret: config.get('BETTER_AUTH_SECRET', 'a-very-secret-key-change-it-in-prod'),
+        secret: configService.get('AUTH_SECRET', 'a-very-secret-key-change-it-in-prod'),
     });
 };
