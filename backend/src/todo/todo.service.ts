@@ -28,8 +28,9 @@ export class TodoService {
         if (includeCount) {
             const [data, total] = await this.todoRepository.findAndCount(typeormQuery);
             return { data, total, metaStats };
+        } else {
+            const data = await this.todoRepository.find(typeormQuery);
+            return { data, metaStats };
         }
-
-        return this.todoRepository.find(typeormQuery);
     }
 }

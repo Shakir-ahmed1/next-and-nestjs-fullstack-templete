@@ -27,7 +27,7 @@ export type Options = {
 const DEFAULTS = {
     defaultPerPage: 20,
     maxPerPage: 100,
-    allowCount: true,
+    allowCount: false,
 };
 
 // helper: cast string to a field type
