@@ -245,7 +245,7 @@ export default function SignUp() {
 								href="/signin"
 							>
 								<span className="dark:text-white/70 cursor-pointer text-orange-400">
-									Log in
+									Sign in
 								</span>
 							</Link>
 						</p>

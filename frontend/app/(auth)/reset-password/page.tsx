@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { Label } from "@radix-ui/react-label";
 import { Loader2 } from "lucide-react";
-import {  useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -53,8 +54,14 @@ export default function ResetPassword() {
     };
 
     if (!searchParams.get("token")) {
-        return (<div>
-            <h1>Invalid reset link</h1>
+        return (<div className="flex flex-col items-center mt-4">
+            <h1>Invalid reset link               <Link
+                href="/signin"
+            >
+                <span className="dark:text-white/70 cursor-pointer text-orange-400">
+                    Sign in
+                </span>
+            </Link></h1>
         </div>)
     }
 

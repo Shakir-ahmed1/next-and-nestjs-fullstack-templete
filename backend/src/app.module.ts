@@ -12,7 +12,9 @@ import { UploadImage } from './lib/media/uploads/entities/upload-image.entity';
 import { MediaModule } from './lib/media/media.module';
 import { TodoModule } from './todo/todo.module';
 import { Todo } from './todo/entities/todo.entity';
-import { AuthModule } from './lib/auth/auth.module';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { getBetterAuthConfig } from './lib/auth/auth';
+import { DataSource } from "typeorm";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -31,11 +33,24 @@ import { AuthModule } from './lib/auth/auth.module';
       }),
       inject: [ConfigService],
     }),
-    AuthModule,
+    AuthModule.forRootAsync({
+      isGlobal: true,
+      imports: [TypeOrmModule.forFeature([User, Account, Session, Verification])],
+      inject: [ConfigService, DataSource],
+      useFactory: (config: ConfigService, dataSource: DataSource) => ({
+        auth: getBetterAuthConfig(config, dataSource),
+      }),
+    }),
     TodoModule,
     ProfileModule,
     UsersModule,
     MediaModule,
+    TypeOrmModule.forFeature([
+      User,
+      Account,
+      Session,
+      Verification,
+    ])
   ],
   controllers: [HealthController],
 })

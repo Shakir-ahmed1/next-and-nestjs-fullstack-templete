@@ -69,7 +69,7 @@ export default function SignIn() {
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
           <CardDescription className="text-xs md:text-sm">
-            Enter your email and password below to login to your account please
+            Enter your email and password below to sign in to your account please
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -122,7 +122,7 @@ export default function SignIn() {
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <p> Login </p>
+                <p> Sign in </p>
               )}
             </Button>
 

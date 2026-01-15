@@ -1,10 +1,10 @@
-import { Controller, Get, Put, Post, Delete, Body, UseInterceptors, UploadedFile, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, UseInterceptors, UploadedFile, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { UploadsService } from '../media/uploads/uploads.service';
 import { FilePurpose } from '../../common/enums/file-purpose.enum';
-import { auth } from '../auth/auth';
-import { fromNodeHeaders } from 'better-auth/node';
+import { Session } from '@thallesp/nestjs-better-auth';
+import type { UserSession } from '@thallesp/nestjs-better-auth';
 import 'multer';
 import { CustomBody } from '../../decorators/custom-body.decorator';
 
@@ -15,26 +15,16 @@ export class ProfileController {
         private uploadsService: UploadsService
     ) { }
 
-    private async getUser(req: any) {
-        const a = fromNodeHeaders(req.headers);
-        // console.log("HEADERS", a)
-        const session = await auth.api.getSession({
-            headers: fromNodeHeaders(req.headers)
-        });
-        // console.log("SESSION", session) 
-        if (!session) throw new UnauthorizedException();
-        return session.user;
-    }
-
     @Get()
-    async getProfile(@Req() req) {
-        const user = await this.getUser(req);
-        return this.profileService.findOne(user.id);
+    async getProfile(@Session() session: UserSession) {
+        if (!session) throw new UnauthorizedException();
+        return this.profileService.findOne(session.user.id);
     }
 
     @Put()
-    async updateProfile(@Req() req, @CustomBody() body: { name: string; image: string }) {
-        const user = await this.getUser(req);
+    async updateProfile(@Session() session: UserSession, @CustomBody() body: { name: string; image: string }) {
+        if (!session) throw new UnauthorizedException();
+        const user = session.user;
         return this.profileService.update(user.id, {
             name: body.name,
             image: body.image,
@@ -44,8 +34,9 @@ export class ProfileController {
 
     @Post('avatar')
     @UseInterceptors(FileInterceptor('image'))
-    async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File, @CustomBody('purpose') purpose: string) {
-        const user = await this.getUser(req);
+    async uploadAvatar(@Session() session: UserSession, @UploadedFile() file: Express.Multer.File, @CustomBody('purpose') purpose: string) {
+        if (!session) throw new UnauthorizedException();
+        const user = session.user;
         const uploadedImage = await this.uploadsService.upload(file, (purpose as FilePurpose) || FilePurpose.AVATAR, user.id);
 
         await this.profileService.update(user.id, { image: uploadedImage.fileUri });
@@ -54,8 +45,9 @@ export class ProfileController {
     }
 
     @Delete('avatar')
-    async deleteAvatar(@Req() req) {
-        const user = await this.getUser(req);
+    async deleteAvatar(@Session() session: UserSession) {
+        if (!session) throw new UnauthorizedException();
+        const user = session.user;
         if (user.image) {
             await this.uploadsService.delete(user.image);
             await this.profileService.update(user.id, { image: '' });
