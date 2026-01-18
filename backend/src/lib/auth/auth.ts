@@ -4,6 +4,9 @@ import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { User } from "../users/entities/user.entity";
+import { Logger } from "@nestjs/common";
+
+const logger = new Logger('BetterAuth');
 
 export const getBetterAuthConfig = (configService: ConfigService, dataSource: DataSource) => {
     return betterAuth({
@@ -16,8 +19,9 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         emailAndPassword: {
             enabled: true,
             sendResetPassword: async ({ user, url }) => {
-                console.log(`Reset password for ${user.email}: ${url}`);
+                logger.log(`Reset password for ${user.email}: ${url}`);
             },
+
         },
         socialProviders: {
             google: {
@@ -27,5 +31,14 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         },
         // Secret is required for production, good to have it anyway
         secret: configService.get('AUTH_SECRET', 'a-very-secret-key-change-it-in-prod'),
+        logger: {
+            enabled: true,
+            level: 'debug',
+            log: (level, message, ...args) => {
+                // Custom logging implementation
+                logger.log(`[${level}] ${message}`, args);
+            }
+        },
     });
 };
+

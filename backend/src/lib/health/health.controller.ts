@@ -1,12 +1,17 @@
-import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException, Logger } from '@nestjs/common';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { DataSource } from 'typeorm';
 
 @Controller('api/health')
+@AllowAnonymous() // All routes inside this controller are public
 export class HealthController {
-  constructor(private readonly dataSource: DataSource) {}
+  private readonly logger = new Logger(HealthController.name);
+
+  constructor(private readonly dataSource: DataSource) { }
 
   @Get()
   health() {
+    this.logger.debug('Health check requested');
     return { status: 'ok' };
   }
 

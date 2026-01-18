@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HealthController } from './lib/health/health.controller';
@@ -15,9 +15,57 @@ import { Todo } from './todo/entities/todo.entity';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { getBetterAuthConfig } from './lib/auth/auth';
 import { DataSource } from "typeorm";
+import { LoggerModule } from 'nestjs-pino';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.interceptor';
+
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    LoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const nodeEnv = configService.get('NODE_ENV', 'development');
+        return {
+          pinoHttp: {
+            level: configService.get('LOG_LEVEL', nodeEnv === 'production' ? 'info' : 'debug'),
+            transport: nodeEnv !== 'production'
+              ? {
+                target: 'pino-pretty',
+                options: {
+                  colorize: true,
+                  singleLine: true,
+                  translateTime: 'SYS:standard',
+                },
+              }
+              : undefined,
+            // Custom request/response serializing
+            serializers: {
+              req: (req) => ({
+                id: req.id,
+                method: req.method,
+                url: req.url,
+                query: req.query,
+                params: req.params,
+                // Avoid logging sensitive headers like Authorization
+                headers: {
+                  ...req.headers,
+                  authorization: req.headers.authorization ? '***' : undefined,
+                  cookie: req.headers.cookie ? '***' : undefined,
+                },
+              }),
+            },
+            autoLogging: true,
+          },
+        };
+      },
+    }),
+
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -34,7 +82,7 @@ import { DataSource } from "typeorm";
       inject: [ConfigService],
     }),
     AuthModule.forRootAsync({
-      disableGlobalAuthGuard: true,
+      // disableGlobalAuthGuard: true,
       isGlobal: true,
       imports: [TypeOrmModule.forFeature([User, Account, Session, Verification])],
       inject: [ConfigService, DataSource],
@@ -54,5 +102,16 @@ import { DataSource } from "typeorm";
     ])
   ],
   controllers: [HealthController],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuthLoggingInterceptor,
+    },
+  ],
+
 })
 export class AppModule { }

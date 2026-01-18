@@ -61,7 +61,7 @@ export default function DevHealthWidget({
                 db: dbStatus,
             };
         },
-        refetchInterval: 25000, // Poll every 5 seconds
+        refetchInterval: 25000, // Poll every 25 seconds
         refetchIntervalInBackground: true, // Continue polling even when tab is not focused
         initialData: { api: "loading", db: "loading" } as HealthState,
     });

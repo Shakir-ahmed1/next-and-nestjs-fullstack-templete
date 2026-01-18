@@ -38,6 +38,9 @@ export class ProfileController {
         if (!session) throw new UnauthorizedException();
         const user = session.user;
         const uploadedImage = await this.uploadsService.upload(file, (purpose as FilePurpose) || FilePurpose.AVATAR, user.id);
+        if (user.image) {
+            await this.uploadsService.delete(user.image);
+        }
 
         await this.profileService.update(user.id, { image: uploadedImage.fileUri });
 

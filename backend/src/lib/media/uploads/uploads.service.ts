@@ -1,4 +1,5 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UploadImage } from './entities/upload-image.entity';
@@ -11,11 +12,15 @@ import { FilePurpose } from '../../../common/enums/file-purpose.enum';
 
 @Injectable()
 export class UploadsService {
+    private readonly logger = new Logger(UploadsService.name);
+
     constructor(
         @InjectRepository(UploadImage)
         private uploadImageRepository: Repository<UploadImage>,
         private configService: ConfigService,
     ) { }
+
+
 
     async upload(file: Express.Multer.File, purpose: FilePurpose, userId: string): Promise<UploadImage> {
         if (!file) throw new BadRequestException('No file provided');
@@ -58,7 +63,8 @@ export class UploadsService {
             try {
                 await fs.unlink(image.filePath);
             } catch (error: any) {
-                if (error.code !== 'ENOENT') console.error('Error deleting file', error);
+                if (error.code !== 'ENOENT') this.logger.error('Error deleting file', error.stack);
+
             }
             await this.uploadImageRepository.remove(image);
         }
