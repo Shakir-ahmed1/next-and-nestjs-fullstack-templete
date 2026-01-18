@@ -19,7 +19,7 @@ async function bootstrap() {
   const logger = app.get(Logger);
 
   // Read your backend port from environment
-  const port = configService.get<number>('NEXT_PUBLIC_BACKEND_PORT', 3000);
+  const port = configService.get<number>('BACKEND_PORT', 3000);
 
   await app.listen(port);
   logger.log(`Backend is running on port ${port}`);

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
 import Providers from './providers';
 import { CheckCircle, XCircle, Info, AlertTriangle } from "lucide-react";
 
@@ -31,16 +30,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
-        <Toaster
-          icons={{
-            success: <CheckCircle className="text-green-500 w-4 h-4 mt-1" />,
-            error: <XCircle className="text-red-500 w-4 h-4 mt-1" />,
-            info: <Info className="text-blue-500 w-4 h-4 mt-1" />,
-            warning: <AlertTriangle className="text-yellow-500 w-4 h-4 mt-1" />,
-          }}
-
-        />
-
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Code2, X } from "lucide-react";
+import { Code2, RefreshCw, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
@@ -28,7 +28,7 @@ export default function DevHealthWidget({
     const [position, setPosition] = useState<CornerPosition>(defaultPosition);
 
     // Use React Query to check health status every 5 seconds
-    const { data: health } = useQuery({
+    const { data: health, refetch } = useQuery({
         queryKey: ["health-check"],
         queryFn: async (): Promise<HealthState> => {
             // Check each endpoint independently to avoid one failure affecting the other
@@ -61,8 +61,7 @@ export default function DevHealthWidget({
                 db: dbStatus,
             };
         },
-        refetchInterval: 25000, // Poll every 25 seconds
-        refetchIntervalInBackground: true, // Continue polling even when tab is not focused
+        refetchOnWindowFocus: 'always',
         initialData: { api: "loading", db: "loading" } as HealthState,
     });
 
@@ -98,9 +97,14 @@ export default function DevHealthWidget({
                     <div className="w-64 rounded-2xl bg-white shadow-xl border p-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-sm font-semibold">Dev Health</h3>
-                            <button onClick={() => setOpen(false)}>
-                                <X className="h-4 w-4" />
-                            </button>
+                            <div className="flex space-between gap-1">
+                                <button onClick={() => refetch()}>
+                                    <RefreshCw className="h-4 w-4" />
+                                </button>
+                                <button onClick={() => setOpen(false)}>
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
                         </div>
 
                         <StatusRow label="API" state={health.api} />
