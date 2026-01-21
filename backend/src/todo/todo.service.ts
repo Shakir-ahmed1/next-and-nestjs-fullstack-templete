@@ -31,7 +31,7 @@ export class TodoService {
 
         if (includeCount) {
             const [data, total] = await this.todoRepository.findAndCount(typeormQuery);
-            return { data, total, metaStats };
+            return { data, metaStats: { ...metaStats, total } };
         } else {
             const data = await this.todoRepository.find(typeormQuery);
             return { data, metaStats };

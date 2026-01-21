@@ -5,6 +5,7 @@ import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { User } from "../users/entities/user.entity";
 import { Logger } from "@nestjs/common";
+import { openAPI } from "better-auth/plugins";
 
 const logger = new Logger('BetterAuth');
 
@@ -39,6 +40,10 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
                 logger.log(`[${level}] ${message}`, args);
             }
         },
-    });
+        plugins: [
+            openAPI(),
+        ]
+    },
+);
 };
 
