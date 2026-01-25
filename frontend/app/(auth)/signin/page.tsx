@@ -41,6 +41,9 @@ export default function SignIn() {
           }
           setLoading(false);
         },
+        onSuccess: (ctx) => {
+          toast.success("You have been signed in");
+        },
       },
     );
   }
@@ -56,6 +59,12 @@ export default function SignIn() {
         },
         onResponse: (ctx) => {
           setLoading(false);
+        },
+        onSuccess: (ctx) => {
+          toast.success("You have been signed in");
+        },
+        onError: (ctx) => {
+          toast.error("Something went wrong");
         },
       },
     );

@@ -3,6 +3,7 @@ import {
     createAuthClient
 } from "better-auth/react";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 
 export const authClient = createAuthClient({
@@ -10,6 +11,15 @@ export const authClient = createAuthClient({
 })
 
 export const handleSignOut = async () => {
-    await authClient.signOut()
+    await authClient.signOut({
+        fetchOptions: {
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            },
+            onSuccess: async () => {
+                toast.success("You have been signed out");
+            },
+        }
+    })
     redirect('/signin')
 }

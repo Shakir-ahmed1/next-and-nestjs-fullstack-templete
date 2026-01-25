@@ -39,6 +39,12 @@ export default function ChangePassword() {
                 setLoading(false);
                 toast("Password reset successfully");
             },
+            onSuccess: () => {
+                toast("Password reset successfully");
+            },
+            onError: () => {
+                toast.error("Failed to change the password, please try again");
+            },
         }
         );
 

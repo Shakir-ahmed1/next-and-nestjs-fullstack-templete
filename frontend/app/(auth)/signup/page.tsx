@@ -33,10 +33,10 @@ export default function SignUp() {
 
 
 	const handleEmailSignUp = async () => {
-        if (password && password !== passwordConfirmation) {
-            toast.error("password and confirm password must be the same")
-            return;
-        }
+		if (password && password !== passwordConfirmation) {
+			toast.error("password and confirm password must be the same")
+			return;
+		}
 		await authClient.signUp.email({
 			email,
 			password,
@@ -72,6 +72,12 @@ export default function SignUp() {
 				},
 				onResponse: (ctx) => {
 					setLoading(false);
+				},
+				onSuccess: (ctx) => {
+					toast.success("You have been signed in");
+				},
+				onError: (ctx) => {
+					toast.error("Something went wrong");
 				},
 			},
 		);
@@ -147,7 +153,7 @@ export default function SignUp() {
 								onChange={(e) => setPassword(e.target.value)}
 								autoComplete="new-password"
 								placeholder="Enter your password"
-                                required
+								required
 							/>
 						</div>
 						<div className="grid gap-2">
@@ -159,7 +165,7 @@ export default function SignUp() {
 								onChange={(e) => setPasswordConfirmation(e.target.value)}
 								autoComplete="new-password"
 								placeholder="Confirm your password"
-                                required
+								required
 							/>
 						</div>
 						<div className="grid gap-2">

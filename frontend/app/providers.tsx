@@ -13,6 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster />
       {children}
       {NEXT_PUBLIC_NODE_ENV === 'development' &&
         <>

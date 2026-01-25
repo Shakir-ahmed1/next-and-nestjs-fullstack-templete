@@ -46,6 +46,9 @@ export async function requireAuth() {
     if (!session) {
         redirect("/signin");
     }
+    if (!session.user.emailVerified) {
+        redirect("/verify");
+    }
 
     return session;
 }
@@ -55,9 +58,26 @@ export async function requireAuth() {
  */
 export async function requireGuest() {
     const session = await getSession();
+    if (session) {
+        if (session.user.emailVerified) {
+            redirect("/");
+        } else {
+            redirect("/verify");
+        }
+    } else {
+        return true;
+    }
+}
+export async function requireUnverified() {
+    const session = await getSession();
+    if (!session) {
+        redirect("/signin");
+    }
+    if (session.user.emailVerified) {
+        redirect("/");
+    }
     return session;
 }
-
 /**
  * Get authenticated user or null
  */
