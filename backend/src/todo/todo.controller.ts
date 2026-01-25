@@ -6,11 +6,9 @@ import { TodoResponseDto } from './dto/todo-response.dto';
 import { ApiQueryOptions } from '../decorators/api-query-options.decorator';
 import { createPaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { Todo } from './entities/todo.entity';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-
+import { TODO_QUERY_CONFIG } from './todo.config';
 @ApiTags('todos')
-@Controller('todos')
-@AllowAnonymous()
+@Controller('/api/todos')
 export class TodoController {
     constructor(private readonly todoService: TodoService) { }
 
@@ -74,20 +72,7 @@ Retrieve todos with advanced query capabilities:
         description: 'List of todos with metadata',
         type: createPaginatedResponseDto<Todo>(TodoResponseDto),
     })
-    @ApiQueryOptions({
-        allowedFields: ['id', 'title', 'task', 'createdAt', 'updatedAt'],
-        fieldTypes: {
-            id: 'number',
-            title: 'string',
-            task: 'string',
-            createdAt: 'date',
-            updatedAt: 'date',
-        },
-        defaultSort: '-createdAt',
-        defaultPerPage: 20,
-        maxPerPage: 100,
-        allowCount: true,
-    })
+    @ApiQueryOptions(TODO_QUERY_CONFIG)
     findAll(@Query() query: any) {
         return this.todoService.findAll(query);
     }

@@ -30,7 +30,6 @@ export default function SignIn() {
           setLoading(true);
         },
         onResponse: (ctx) => {
-          // console.log("Sign in status", ctx.response.status)
           if (ctx.response.status === 200) {
             router.push("/");
           }
@@ -44,8 +43,6 @@ export default function SignIn() {
         },
       },
     );
-    // console.log("Email sign in data", data)
-    // console.log("Email sign in error", error)
   }
   const handleSocialSignIn = async () => {
     await authClient.signIn.social(

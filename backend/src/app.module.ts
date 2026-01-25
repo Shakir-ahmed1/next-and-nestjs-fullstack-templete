@@ -82,7 +82,6 @@ import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.inter
       inject: [ConfigService],
     }),
     AuthModule.forRootAsync({
-      // disableGlobalAuthGuard: true,
       isGlobal: true,
       imports: [TypeOrmModule.forFeature([User, Account, Session, Verification])],
       inject: [ConfigService, DataSource],

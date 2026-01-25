@@ -13,21 +13,46 @@ import {
     FindManyOptions
 } from "typeorm";
 
-type FieldType = "string" | "number" | "boolean" | "date" | "enum";
+export type FieldType = "string" | "number" | "boolean" | "date" | "enum";
 
-export type Options = {
+/**
+ * Shared configuration for buildQueryOptions and ApiQueryOptions
+ */
+export interface QueryConfig {
+    /**
+     * Fields that are allowed to be used in filters/sort
+     */
+    allowedFields: string[];
+    /**
+     * Field types for proper documentation and casting
+     */
     fieldTypes?: Record<string, FieldType>;
+    /**
+     * Default items per page
+     */
     defaultPerPage?: number;
+    /**
+     * Maximum items per page
+     */
     maxPerPage?: number;
-    defaultSort?: string | string[]; // e.g. "-createdAt" or ["-createdAt","id"]
-    allowCount?: boolean; // default true
-    enumValues?: Record<string, string[]>; // Available values for enum fields
-};
+    /**
+     * Default sort order (e.g. "-createdAt" or ["-createdAt","id"])
+     */
+    defaultSort?: string | string[];
+    /**
+     * Whether to allow includeCount parameter. Default is true.
+     */
+    allowCount?: boolean;
+    /**
+     * Available values for enum fields
+     */
+    enumValues?: Record<string, string[]>;
+}
 
-const DEFAULTS = {
+export const QUERY_DEFAULTS: Partial<QueryConfig> = {
     defaultPerPage: 20,
     maxPerPage: 100,
-    allowCount: false,
+    allowCount: true,
 };
 
 // helper: cast string to a field type
@@ -59,17 +84,29 @@ function castValue(val: string, type: FieldType, enumValues?: string[]) {
  * Build TypeORM-compatible findMany options (where, order, skip, take)
  *
  * query: Record<string,string|string[]|undefined> from request query
- * allowedFields: fields that are allowed to be used in filters/sort
- * opts: fieldTypes, enumValues etc
+ * allowedFieldsOrOpts: either the list of allowed fields or a full QueryConfig
+ * opts: optional QueryConfig if the first argument was just allowedFields
  */
 export function buildQueryOptions<T = any>(
     query: Record<string, string | string[] | undefined>,
-    allowedFields: string[],
-    opts?: Options
+    allowedFieldsOrOpts: string[] | QueryConfig,
+    opts?: QueryConfig
 ) {
-    const { fieldTypes = {}, enumValues = {}, defaultPerPage, maxPerPage, defaultSort, allowCount } = {
-        ...DEFAULTS,
-        ...(opts || {}),
+    const config: QueryConfig = Array.isArray(allowedFieldsOrOpts)
+        ? { allowedFields: allowedFieldsOrOpts, ...opts }
+        : allowedFieldsOrOpts;
+
+    const {
+        fieldTypes = {},
+        enumValues = {},
+        defaultPerPage,
+        maxPerPage,
+        defaultSort,
+        allowCount,
+        allowedFields = [],
+    } = {
+        ...QUERY_DEFAULTS,
+        ...config,
     };
 
     const where: any = {};
@@ -164,7 +201,7 @@ export function buildQueryOptions<T = any>(
 
     // Pagination
     let page = 1;
-    let perPage = defaultPerPage ?? DEFAULTS.defaultPerPage;
+    let perPage = defaultPerPage ?? QUERY_DEFAULTS.defaultPerPage!;
 
     if (query.page !== undefined) {
         const p = parseInt(String(query.page), 10);
@@ -178,7 +215,7 @@ export function buildQueryOptions<T = any>(
         if (!Number.isNaN(pp) && pp > 0) perPage = pp;
     }
 
-    const finalMax = maxPerPage ?? DEFAULTS.maxPerPage;
+    const finalMax = maxPerPage ?? QUERY_DEFAULTS.maxPerPage!;
     if (perPage > finalMax) perPage = finalMax;
 
     let skip = (page - 1) * perPage;
@@ -191,7 +228,7 @@ export function buildQueryOptions<T = any>(
 
     // includeCount
     const includeCountParam = query.includeCount;
-    let includeCount = allowCount ?? DEFAULTS.allowCount;
+    let includeCount = allowCount ?? QUERY_DEFAULTS.allowCount!;
     if (includeCountParam !== undefined) {
         const v = String(includeCountParam).toLowerCase();
         includeCount = !(v === "false" || v === "0" || v === "no");

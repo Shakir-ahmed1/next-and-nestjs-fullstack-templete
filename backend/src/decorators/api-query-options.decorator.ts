@@ -1,45 +1,12 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
+import { QueryConfig, QUERY_DEFAULTS } from '../lib/query-builder-typeorm';
 
 /**
  * Configuration for documenting query options in Swagger
+ * Inherits from shared QueryConfig and adds Swagger-specific options
  */
-export interface ApiQueryOptionsConfig {
-    /**
-     * Fields that can be filtered/sorted
-     */
-    allowedFields: string[];
-
-    /**
-     * Field types for proper documentation
-     */
-    fieldTypes?: Record<string, 'string' | 'number' | 'boolean' | 'date' | 'enum'>;
-
-    /**
-     * Enum values for enum fields
-     */
-    enumValues?: Record<string, string[]>;
-
-    /**
-     * Default sort order (e.g., "-createdAt")
-     */
-    defaultSort?: string | string[];
-
-    /**
-     * Default items per page
-     */
-    defaultPerPage?: number;
-
-    /**
-     * Maximum items per page
-     */
-    maxPerPage?: number;
-
-    /**
-     * Whether count is allowed
-     */
-    allowCount?: boolean;
-
+export interface ApiQueryOptionsConfig extends QueryConfig {
     /**
      * Additional custom query parameters to document
      */
@@ -102,9 +69,9 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
         fieldTypes = {},
         enumValues = {},
         defaultSort,
-        defaultPerPage = 20,
-        maxPerPage = 100,
-        allowCount = false,
+        defaultPerPage = QUERY_DEFAULTS.defaultPerPage,
+        maxPerPage = QUERY_DEFAULTS.maxPerPage,
+        allowCount = QUERY_DEFAULTS.allowCount,
         customParams = [],
     } = config;
 
@@ -116,29 +83,25 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
             name: 'page',
             required: false,
             type: Number,
-            description: 'Page number (1-indexed)',
-            example: 1,
+            description: 'Page number (1-indexed), (e.g. 1)',
         }),
         ApiQuery({
             name: 'perPage',
             required: false,
             type: Number,
-            description: `Items per page (max: ${maxPerPage}, default: ${defaultPerPage})`,
-            example: defaultPerPage,
+            description: `Items per page (max: ${maxPerPage}, default: ${defaultPerPage}, e.g. 20)`,
         }),
         ApiQuery({
             name: 'limit',
             required: false,
             type: Number,
-            description: `Alias for perPage. Items per page (max: ${maxPerPage})`,
-            example: defaultPerPage,
+            description: `Alias for perPage. Items per page (max: ${maxPerPage}, e.g. 20)`,
         }),
         ApiQuery({
             name: 'offset',
             required: false,
             type: Number,
-            description: 'Number of items to skip (overrides page)',
-            example: 0,
+            description: 'Number of items to skip (overrides page), (e.g. 0)',
         })
     );
 
@@ -154,15 +117,13 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
             name: 'sort',
             required: false,
             type: String,
-            description: `Sort order. Prefix with "-" for descending. Comma-separated for multiple fields. Allowed fields: ${allowedFields.join(', ')}`,
-            example: sortExample,
+            description: `Sort order. Prefix with "-" for descending. Comma-separated for multiple fields. Allowed fields: ${allowedFields.join(', ')} (e.g. ${sortExample})`,
         }),
         ApiQuery({
             name: 'orderBy',
             required: false,
             type: String,
-            description: 'Alias for sort',
-            example: sortExample,
+            description: 'Alias for sort (e.g. ' + sortExample + ')',
         })
     );
 
@@ -173,8 +134,7 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
                 name: 'includeCount',
                 required: false,
                 type: Boolean,
-                description: 'Include total count in response',
-                example: true,
+                description: 'Include total count in response (e.g. true)',
             })
         );
     }
@@ -211,8 +171,7 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
                 type: swaggerType,
                 description: isEnum
                     ? `Filter by ${field} (exact match). Allowed values: ${enumVals?.join(', ')}`
-                    : `Filter by ${field} (exact match)`,
-                example: exampleValue,
+                    : `Filter by ${field} (exact match) (e.g. ${exampleValue})`,
             })
         );
 
@@ -226,8 +185,7 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
                     name: `${field}[${op}]`,
                     required: false,
                     type: swaggerType,
-                    description: getOperatorDescription(op, field, fieldType, enumVals),
-                    example: opExample,
+                    description: getOperatorDescription(op, field, fieldType, enumVals) + ' (e.g. ' + opExample + ')',
                 })
             );
         }
@@ -240,8 +198,7 @@ export function ApiQueryOptions(config: ApiQueryOptionsConfig) {
                 name: param.name,
                 required: param.required || false,
                 type: param.type === 'number' ? Number : param.type === 'boolean' ? Boolean : String,
-                description: param.description,
-                example: param.example,
+                description: param.description + ' (e.g. ' + param.example + ')',
             })
         );
     }

@@ -1,26 +1,27 @@
 // Auth helpers for server components - fetches session from backend API
-import { NEXT_PUBLIC_BACKEND_PORT, NEXT_PUBLIC_NGINX_HOST_NAME, NEXT_PUBLIC_NGINX_PORT } from "@/config";
+import { NEXT_PUBLIC_NGINX_HOST_NAME, NEXT_PUBLIC_NGINX_PORT } from "@/config";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-/**
+/** SHARED */
+export const COOKIE_PREFIX = "twin-commerce";
+export const COOKIE_SESSION_TOKEN = `${COOKIE_PREFIX}.session_token`;/**
  * Get session from backend API
  * This is used in server components to check authentication status
  */
 export async function getSession() {
     try {
         const cookieStore = await cookies();
-        const sessionToken = cookieStore.get("better-auth.session_token");
+        const sessionToken = cookieStore.get(COOKIE_SESSION_TOKEN);
 
         if (!sessionToken) {
             return null;
         }
-        console.log(sessionToken)
 
         // Call backend to validate session
         const response = await fetch(`http://${NEXT_PUBLIC_NGINX_HOST_NAME}:${NEXT_PUBLIC_NGINX_PORT}/api/auth/get-session`, {
             headers: {
-                Cookie: `better-auth.session_token=${sessionToken.value}`,
+                Cookie: `${COOKIE_SESSION_TOKEN}=${sessionToken.value}`,
             },
             cache: 'no-store',
         });
@@ -29,7 +30,6 @@ export async function getSession() {
         }
 
         const data = await response.json();
-        // console.log(data)
         return data || null;
     } catch (error) {
         console.error("Error fetching session:", error);
