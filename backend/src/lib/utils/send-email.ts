@@ -37,3 +37,11 @@ ${companyInfo.name} Support Team
 `
     })
 }
+
+export async function sendVerificationEmail({ user, url }: { user: User, url: string }) {
+    void sendEmail({
+        to: user.email,
+        subject: 'Verify your email address',
+        text: `Click the link to verify your email: ${url}`
+    })
+}

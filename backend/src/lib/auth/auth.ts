@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
 import { openAPI, OpenAPIModelSchema } from "better-auth/plugins";
 import { COOKIE_PREFIX } from "./auth.config";
-import { sendEmail, sendResetPasswordEmail } from "../utils/send-email";
+import {  sendResetPasswordEmail, sendVerificationEmail} from "../utils/send-email";
 
 const logger = new Logger('BetterAuth');
 
@@ -21,6 +21,12 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         emailAndPassword: {
             enabled: true,
             sendResetPassword: sendResetPasswordEmail,
+        },
+        emailVerification: {
+            
+            sendOnSignUp: true,
+            autoSignInAfterVerification: true,
+            sendVerificationEmail,
 
         },
         socialProviders: {
