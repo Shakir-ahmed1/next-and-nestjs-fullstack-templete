@@ -52,10 +52,10 @@ async function bootstrap() {
       },
     });
 
-    const port = configService.get<number>('BACKEND_PORT', 3007);
+    const port = configService.get<number>('BACKEND_PORT', 3000);
   }
 
-  const port = configService.get<number>('BACKEND_PORT', 3007);
+  const port = configService.get<number>('BACKEND_PORT', 3000);
   await app.listen(port);
 }
 bootstrap();

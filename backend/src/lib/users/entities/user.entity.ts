@@ -20,6 +20,17 @@ export class User {
     @Column({ nullable: true })
     image: string;
 
+    @Column({ default: 'user' })
+    role: string;
+
+    @Column({ default: false })
+    banned: boolean;
+
+    @Column({ nullable: true })
+    banReason?: string;
+
+    @Column({ type: "datetime", nullable: true })
+    banExpires?: Date;
     @CreateDateColumn()
     createdAt: Date;
 

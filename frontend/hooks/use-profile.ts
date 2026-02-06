@@ -8,7 +8,7 @@ export type User = {
   email: string;
   image?: string | null;
   emailVerified: boolean;
-  
+  role: string;
 };
 
 // 1. Fetch profile query using Axios

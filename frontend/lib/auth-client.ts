@@ -1,13 +1,14 @@
 import { NEXT_PUBLIC_API_URL } from "@/config";
-import {
-    createAuthClient
-} from "better-auth/react";
+import { createAuthClient } from "better-auth/react";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
-
+import { adminClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
     baseURL: NEXT_PUBLIC_API_URL + '/auth', // Points to NestJS backend
+    plugins: [
+        adminClient(),
+    ],
 })
 
 export const handleSignOut = async () => {

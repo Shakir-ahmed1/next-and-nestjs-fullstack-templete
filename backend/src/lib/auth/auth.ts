@@ -4,9 +4,9 @@ import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
-import { openAPI, OpenAPIModelSchema } from "better-auth/plugins";
+import { openAPI, admin } from "better-auth/plugins";
 import { COOKIE_PREFIX } from "./auth.config";
-import {  sendResetPasswordEmail, sendVerificationEmail} from "../utils/send-email";
+import { sendResetPasswordEmail, sendVerificationEmail } from "../utils/send-email";
 
 const logger = new Logger('BetterAuth');
 
@@ -23,7 +23,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
             sendResetPassword: sendResetPasswordEmail,
         },
         emailVerification: {
-            
+
             sendOnSignUp: true,
             autoSignInAfterVerification: true,
             sendVerificationEmail,
@@ -47,6 +47,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         },
         plugins: [
             openAPI(),
+            admin(),
         ],
         advanced: {
             cookiePrefix: COOKIE_PREFIX,
