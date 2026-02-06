@@ -8,22 +8,30 @@ import { useState } from "react";
 import { Toaster } from "sonner";
 
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      {children}
-      {NEXT_PUBLIC_NODE_ENV === 'development' &&
-        <>
-          <ReactQueryDevtools initialIsOpen={false} />
-          <DevHealthWidget
-            defaultPosition="bottom-right"
-          />
-        </>
-      }
-
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Toaster />
+        {children}
+        {NEXT_PUBLIC_NODE_ENV === 'development' &&
+          <>
+            <ReactQueryDevtools initialIsOpen={false} />
+            <DevHealthWidget
+              defaultPosition="bottom-right"
+            />
+          </>
+        }
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

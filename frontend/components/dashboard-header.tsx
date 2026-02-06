@@ -8,14 +8,14 @@ import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 export function DashboardHeader() {
-  const { theme, setTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   // Avoid hydration mismatch
   useEffect(() => setMounted(true), [])
 
   return (
-    <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3">
+    <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
@@ -38,12 +38,15 @@ export function DashboardHeader() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          title="Toggle theme"
         >
-          {mounted && theme === "dark" ? (
-            <Moon className="h-5 w-5" />
-          ) : (
+          {!mounted ? (
+            <div className="h-5 w-5" />
+          ) : resolvedTheme === "dark" ? (
             <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
           )}
         </Button>
       </div>
