@@ -33,6 +33,10 @@ export default function SignUp() {
 
 
 	const handleEmailSignUp = async () => {
+		if (!email || !password) {
+			toast.error("Please enter your email and password");
+			return;
+		}
 		if (password && password !== passwordConfirmation) {
 			toast.error("password and confirm password must be the same")
 			return;

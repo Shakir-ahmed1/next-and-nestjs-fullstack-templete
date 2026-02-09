@@ -20,6 +20,10 @@ export default function SignIn() {
   const router = useRouter();
 
   const handleEmailSignIn = async () => {
+    if (!email || !password) {
+      toast.error("Please enter your email and password");
+      return;
+    }
     const {data, error} = await authClient.signIn.email(
       {
         email,

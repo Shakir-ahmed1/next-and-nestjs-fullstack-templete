@@ -1,8 +1,8 @@
 # Root gitignore for monorepo
 
 # Environment files
-.env.dev
-.env
+.env.production
+.env.development
 .env.local
 .env.*.local
 
