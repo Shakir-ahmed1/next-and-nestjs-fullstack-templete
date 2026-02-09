@@ -1,0 +1,148 @@
+services:
+  twin-db:
+    container_name: twin-db-prod
+    image: mariadb:11.0.2
+    volumes:
+      - twin-db-data-prod:/var/lib/mysql
+    restart: unless-stopped
+    environment:
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      PUID: 1000
+      PGID: 1000
+      TZ: ${TZ}
+    env_file:
+      - .env.production
+    networks:
+      - twin-db-net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Don't expose database port in production for security
+    # Only accessible via internal network
+
+  twin-backend:
+    container_name: twin-backend-prod
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+      target: production
+    volumes:
+      - uploads:/usr/src/app/uploads:rw
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${DB_USERNAME}:${DB_PASSWORD}@${DB_SERVICE_NAME}:${DB_PORT}/${DB_NAME}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      AUTH_SECRET: ${AUTH_SECRET}
+      FILE_UPLOAD_BASE_DIR: /usr/src/app/uploads/files/images
+      PORT: ${BACKEND_PORT}
+    env_file:
+      - .env.production
+    restart: unless-stopped
+    depends_on:
+      twin-db:
+        condition: service_healthy
+    networks:
+      - twin-db-net
+      - twin-backend-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    # Don't expose backend port directly in production
+    # Only accessible via nginx reverse proxy
+
+  twin-frontend:
+    container_name: twin-frontend-prod
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - NEXT_PUBLIC_API_URL=${API_URL}
+        - NEXT_PUBLIC_NODE_ENV=production
+        - NEXT_PUBLIC_BACKEND_PORT=${BACKEND_PORT}
+        - NEXT_PUBLIC_NGINX_HOST_NAME=${NGINX_HOST_NAME}
+        - NEXT_PUBLIC_NGINX_PORT=${NGINX_PORT}
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${API_URL}
+      NEXT_PUBLIC_NODE_ENV: production
+      NEXT_PUBLIC_BACKEND_PORT: ${BACKEND_PORT}
+      NEXT_PUBLIC_NGINX_HOST_NAME: ${NGINX_HOST_NAME}
+      NEXT_PUBLIC_NGINX_PORT: ${NGINX_PORT}
+    env_file:
+      - .env.production
+    restart: unless-stopped
+    depends_on:
+      twin-backend:
+        condition: service_healthy
+    networks:
+      - twin-frontend-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    # Don't expose frontend port directly in production
+    # Only accessible via nginx reverse proxy
+
+  twin-nginx:
+    container_name: twin-nginx-prod
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      BACKEND_HOST: ${BACKEND_HOST}
+      NEXT_PUBLIC_BACKEND_PORT: ${BACKEND_PORT}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      FRONTEND_PORT: 3000
+      NEXT_PUBLIC_NGINX_PORT: ${NGINX_PORT}
+    env_file:
+      - .env.production
+    ports:
+      - "${NGINX_PORT:-8085}:${NGINX_PORT:-8085}"
+    depends_on:
+      twin-backend:
+        condition: service_healthy
+      twin-frontend:
+        condition: service_healthy
+    networks:
+      - twin-nginx-net
+      - twin-backend-net
+      - twin-frontend-net
+    volumes:
+      - uploads:/usr/share/nginx/html/uploads:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${NGINX_PORT:-8085}/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  twin-db-net:
+    driver: bridge
+  twin-backend-net:
+    driver: bridge
+  twin-frontend-net:
+    driver: bridge
+  twin-nginx-net:
+    driver: bridge
+
+volumes:
+  twin-db-data-prod:
+    driver: local
+  uploads:
+    driver: local
