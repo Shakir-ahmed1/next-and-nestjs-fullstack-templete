@@ -42,7 +42,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       FILE_UPLOAD_BASE_DIR: /usr/src/app/uploads/files/images
-      PORT: ${NEXT_PUBLIC_BACKEND_PORT}
+      PORT: ${BACKEND_PORT}
     env_file:
       - .env.development
     restart: unless-stopped
@@ -55,7 +55,7 @@ services:
       - twin-backend-net
       - twin-frontend-net
     ports:
-      - "${NEXT_PUBLIC_BACKEND_PORT:-3000}:${NEXT_PUBLIC_BACKEND_PORT:-3000}"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
 
   twin-frontend:
     container_name: twin-frontend
@@ -92,13 +92,13 @@ services:
     environment:
       NODE_ENV: development
       BACKEND_HOST: ${BACKEND_HOST:-twin-backend}
-      NEXT_PUBLIC_BACKEND_PORT: ${NEXT_PUBLIC_BACKEND_PORT:-3000}
+      BACKEND_PORT: ${BACKEND_PORT:-3000}
       FRONTEND_HOST: ${FRONTEND_HOST:-twin-frontend}
       FRONTEND_PORT: ${FRONTEND_PORT:-3001}
     env_file:
       - .env.development
     ports:
-      - "${NEXT_PUBLIC_NGINX_PORT:-8081}:${NEXT_PUBLIC_NGINX_PORT:-8081}"
+      - "${NGINX_PORT:-8081}:${NGINX_PORT:-8081}"
     depends_on:
       - twin-backend
       - twin-frontend

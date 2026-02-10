@@ -17,6 +17,7 @@ export async function getSession() {
         if (!sessionToken) {
             return null;
         }
+        console.log("request url", `http://${NEXT_PUBLIC_NGINX_HOST_NAME}:${NEXT_PUBLIC_NGINX_PORT}/api/auth/get-session`)
 
         // Call backend to validate session
         const response = await fetch(`http://${NEXT_PUBLIC_NGINX_HOST_NAME}:${NEXT_PUBLIC_NGINX_PORT}/api/auth/get-session`, {

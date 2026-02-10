@@ -4,9 +4,10 @@ import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
-import { openAPI, admin } from "better-auth/plugins";
+import { openAPI, admin, organization, createAccessControl } from "better-auth/plugins";
 import { COOKIE_PREFIX } from "./auth.config";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../utils/send-email";
+import { customAC, customRoles } from "./auth-permissions";
 
 const logger = new Logger('BetterAuth');
 
@@ -48,6 +49,18 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         plugins: [
             openAPI(),
             admin(),
+            organization({
+                ac: customAC,
+                roles: customRoles,
+                // Allowing users to belong to multiple sites (Organizations)
+                allowMultipleOrganizations: true,
+                // Creating an organization creator role by default
+                creatorRole: "owner",
+                allowUserToCreateOrganization: async (user) => {
+                    return user.role === 'admin'
+                },
+
+            })
         ],
         advanced: {
             cookiePrefix: COOKIE_PREFIX,

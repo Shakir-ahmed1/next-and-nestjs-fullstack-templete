@@ -22,6 +22,7 @@ import {
   Settings,
   ShoppingCart,
   Users,
+  Building2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,7 @@ const menuItems = [
   { title: "Orders", icon: ShoppingCart, href: "/dashboard/orders" },
   { title: "Customers", icon: Users, href: "/dashboard/customers" },
   { title: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { title: "Organizations", icon: Building2, href: "/organizations" },
 ];
 
 export function AppSidebar() {
@@ -87,6 +89,14 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/admin/organizations">
+                      <Building2 className="h-5 w-5" />
+                      <span>Manage Organizations</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -101,7 +111,7 @@ export function AppSidebar() {
             {/* For styling purposes, the content (icon and text) needs to be directly within the button/link component */}
             <SidebarMenuButton asChild>
               {/* Use a Link component and place content inside it for proper flex alignment */}
-              <div onClick={handleSignOut} className="flex items-center gap-3 w-full p-1 cursor-pointer">
+              <donClick={handleSignOut} className="flex items-center gap-3 w-full p-1 cursor-pointer">
                 <LogOut className="h-5 w-5" />
                 <span>Sign Out</span>
               </div>

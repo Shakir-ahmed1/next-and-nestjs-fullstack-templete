@@ -34,6 +34,13 @@ nano .env
 docker-compose up --build
 ```
 
+#### to open it with less dockerized set up in development
+step 1: `set -a; source .env.development.local; set +a; docker compose -f docker-compose.local.yml --env-file .env.development.local up -d;`
+step 2: `cd frontend; set -a; source ../.env.development.local; set +a; npm run dev;`
+step 3: `cd backend; set -a; source ../.env.development.local; set +a; DB_PORT=3307 npm run start:dev;`
+
+#### to open in with a full dockerized develpment
+command: `set -a; source .env.development; set +a; docker compose -f docker-compose.dev.yml --env-file .env.development up -d;`
 **Access points**:
 - Frontend: http://localhost:3001
 - Backend API: http://localhost:3000/api

@@ -105,10 +105,10 @@ services:
     environment:
       NODE_ENV: production
       BACKEND_HOST: ${BACKEND_HOST}
-      NEXT_PUBLIC_BACKEND_PORT: ${BACKEND_PORT}
+      BACKEND_PORT: ${BACKEND_PORT}
       FRONTEND_HOST: ${FRONTEND_HOST}
       FRONTEND_PORT: 3000
-      NEXT_PUBLIC_NGINX_PORT: ${NGINX_PORT}
+      NGINX_PORT: ${NGINX_PORT}
     env_file:
       - .env.production
     ports:
