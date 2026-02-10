@@ -22,7 +22,6 @@ const statement = {
 } as const;
 
 export const customAC = createAccessControl(statement);
-
 /**
  * 2. DEFINE ROLES
  * Assigning the granular permissions from the statement to each role.

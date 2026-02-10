@@ -2,12 +2,15 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
+import { requireAuth } from "@/lib/auth-helpers"
 
-export default function NavSideContainer({
+export default async function NavSideContainer({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await requireAuth()
+
   return (
     <SidebarProvider>
       <AppSidebar />

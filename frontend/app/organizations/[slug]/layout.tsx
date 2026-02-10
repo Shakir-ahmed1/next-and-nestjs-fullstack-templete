@@ -15,7 +15,7 @@ import {
     Loader2
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import HasPermission from "@/components/has-permission";
+import { PermissionGuard } from "@/components/auth/permission-guard";
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
     const params = useParams();
@@ -59,17 +59,14 @@ export default function OrganizationLayout({ children }: { children: React.React
 
     if (isPending) {
         return (
-            <NavSideContainer>
                 <div className="flex h-[50vh] items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-            </NavSideContainer>
         );
     }
 
     if (!organization) {
         return (
-            <NavSideContainer>
                 <div className="flex h-[50vh] flex-col items-center justify-center space-y-4">
                     <Building2 className="h-12 w-12 text-muted-foreground" />
                     <h1 className="text-xl font-bold">Organization not found</h1>
@@ -77,12 +74,10 @@ export default function OrganizationLayout({ children }: { children: React.React
                         Back to my organizations
                     </Link>
                 </div>
-            </NavSideContainer>
         );
     }
 
     return (
-        <NavSideContainer>
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 border-b pb-6">
                     <div className="flex items-center gap-4">
@@ -102,7 +97,7 @@ export default function OrganizationLayout({ children }: { children: React.React
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
                             return (
-                                <HasPermission permissions={item.permissions} key={item.href} item={item.title}>
+                                <PermissionGuard permission={item.permissions} key={item.href}>
                                 <Link
                         
                                     href={item.href}
@@ -116,13 +111,12 @@ export default function OrganizationLayout({ children }: { children: React.React
                                     <item.icon className="h-4 w-4" />
                                     {item.title}
                                 </Link>
-                                </HasPermission>
+                                </PermissionGuard>
                             );
                         })}
                     </nav>
                 </div>
                 {children}
             </div>
-        </NavSideContainer>
     );
 }

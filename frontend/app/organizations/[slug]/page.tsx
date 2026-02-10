@@ -20,7 +20,11 @@ import {
 
 export default function OrganizationOverviewPage() {
     const params = useParams();
+    const { data: session, isPending: isSessionPending } = authClient.useSession();
+
     const slug = params.slug as string;
+    const { data: activeOrg, isPending: isOrgPending } = authClient.useActiveOrganization();
+
 
     const { data: organization } = useQuery({
         queryKey: ["organization", slug],
@@ -44,13 +48,13 @@ export default function OrganizationOverviewPage() {
         },
         {
             title: "Your Role",
-            value: "Admin", // In a real app, find current user's role in organization.members
+            value: activeOrg?.members?.find(m => m.userId === session?.user?.id)?.role || "", // In a real app, find current user's role in organization.members
             icon: Shield,
             description: "Permissions restricted by role"
         },
         {
             title: "Pending Invites",
-            value: organization?.invitations?.length || 0,
+            value: organization?.invitations?.filter(inv => inv.status === 'pending').length || 0,
             icon: UserPlus,
             description: "Sent invitations awaiting response"
         },

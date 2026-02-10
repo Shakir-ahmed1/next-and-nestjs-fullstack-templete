@@ -48,6 +48,7 @@ import {
 import { organizationRoles } from "../../roles";
 import { InvitationStatus } from "better-auth/plugins";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PermissionGuard } from "@/components/auth/permission-guard";
 const invitationStatusColor: Record<InvitationStatus, string> = {
     pending: "bg-secondary text-secondary-foreground ring-border",
 
@@ -178,61 +179,65 @@ export default function OrganizationMembersPage() {
                         Manage members and their roles within the organization.
                     </p>
                 </div>
-                <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Invite Member
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <form onSubmit={handleInvite}>
-                            <DialogHeader>
-                                <DialogTitle>Invite Member</DialogTitle>
-                                <DialogDescription>
-                                    Send an invitation email to a new member.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Email Address</Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="colleague@example.com"
-                                        value={inviteEmail}
-                                        onChange={(e) => setInviteEmail(e.target.value)}
-                                        required
-                                    />
+                <PermissionGuard permission={{
+                    invitation: ["create"],
+                }}>
+                    <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Invite Member
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <form onSubmit={handleInvite}>
+                                <DialogHeader>
+                                    <DialogTitle>Invite Member</DialogTitle>
+                                    <DialogDescription>
+                                        Send an invitation email to a new member.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="email">Email Address</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="colleague@example.com"
+                                            value={inviteEmail}
+                                            onChange={(e) => setInviteEmail(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="role">Role</Label>
+                                        <Select value={inviteRole} onValueChange={setInviteRole}>
+                                            <SelectTrigger id="role">
+                                                <SelectValue placeholder="Select a role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {memberRolesList.map((role) => (
+                                                    <SelectItem key={role} value={role}>
+                                                        {role}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="role">Role</Label>
-                                    <Select value={inviteRole} onValueChange={setInviteRole}>
-                                        <SelectTrigger id="role">
-                                            <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {memberRolesList.map((role) => (
-                                                <SelectItem key={role} value={role}>
-                                                    {role}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isInviting}>
-                                    {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Send Invite
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                                <DialogFooter>
+                                    <Button type="button" variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={isInviting}>
+                                        {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Send Invite
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </PermissionGuard>
             </div>
 
             <Card>
@@ -256,31 +261,35 @@ export default function OrganizationMembersPage() {
                                         <p className="text-xs text-muted-foreground">{member.user.email}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <Select
-                                        defaultValue={member.role}
-                                        onValueChange={(val: string) => handleUpdateRole(member.id, val)}
-                                    >
-                                        <SelectTrigger className="w-[140px] h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {memberRolesList.map((role) => (
-                                                <SelectItem key={role} value={role} className="text-xs">
-                                                    {role}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                        onClick={() => handleRemoveMember(member.id)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
+                                <PermissionGuard permission={{
+                                    members: ["update", "delete"],
+                                }}>
+                                    <div className="flex items-center gap-4">
+                                        <Select
+                                            defaultValue={member.role}
+                                            onValueChange={(val: string) => handleUpdateRole(member.id, val)}
+                                        >
+                                            <SelectTrigger className="w-[140px] h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {memberRolesList.map((role) => (
+                                                    <SelectItem key={role} value={role} className="text-xs">
+                                                        {role}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => handleRemoveMember(member.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </PermissionGuard>
                             </div>
                         ))}
                         {(!organization?.members || organization.members.length === 0) && (
@@ -293,73 +302,81 @@ export default function OrganizationMembersPage() {
             </Card>
 
             {organization?.invitations && organization.invitations.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pending Invitations</CardTitle>
-                        <CardDescription>
-                            Invites that haven't been accepted yet.
-                        </CardDescription>
-                        <CardAction>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="confirm-disabled"
-                                    checked={showInvitationHistory}
-                                    onCheckedChange={(checked) => setShowInvtationHistory(checked === true)}
-                                />
-                                <Label
-                                    htmlFor="confirm-disabled"
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                >
-                                    Show Invitation History
-                                </Label>
-                            </div>                        </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {organization.invitations.filter((invite) => showInvitationHistory ? true : invite.status === "pending").sort(
-                                (a, b) =>
-                                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                            )
-                                .map((invite) => (
-                                    <div key={invite.id} className="flex items-center justify-between p-2 rounded-lg border border-dashed">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-                                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">{invite.email}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Role: {invite.role}
-                                                </p>
-                                                <p
-                                                    className="text-xs text-muted-foreground"
-                                                    title={invite.createdAt.toLocaleString()}
-                                                >
-                                                    Sent {invite.createdAt.toLocaleDateString(undefined, {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        year: "numeric",
-                                                    })}
-                                                </p>
-                                            </div>
+                <PermissionGuard permission={{
+                    invitation: ["create", "cancel"],
+                }}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Pending Invitations</CardTitle>
+                            <CardDescription>
+                                Invites that haven't been accepted yet.
+                            </CardDescription>
+                            <CardAction>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="confirm-disabled"
+                                        checked={showInvitationHistory}
+                                        onCheckedChange={(checked) => setShowInvtationHistory(checked === true)}
+                                    />
+                                    <Label
+                                        htmlFor="confirm-disabled"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                    >
+                                        Show Invitation History
+                                    </Label>
+                                </div>                        </CardAction>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {organization.invitations.filter((invite) => showInvitationHistory ? true : invite.status === "pending").sort(
+                                    (a, b) =>
+                                        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                                )
+                                    .map((invite) => (
+                                        <div key={invite.id} className="flex items-center justify-between p-2 rounded-lg border border-dashed">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                                                    <Mail className="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">{invite.email}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Role: {invite.role}
+                                                    </p>
+                                                    <p
+                                                        className="text-xs text-muted-foreground"
+                                                        title={invite.createdAt.toLocaleString()}
+                                                    >
+                                                        Sent {invite.createdAt.toLocaleDateString(undefined, {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        })}
+                                                    </p>
+                                                </div>
 
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset ${invitationStatusColor[invite.status]}`}>{invite.status}</span>
+                                                <PermissionGuard permission={{
+                                                    invitation: ["cancel"],
+                                                }}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-xs font-normal"
+                                                        onClick={() => handleCancelInvite(invite.id)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </PermissionGuard>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset ${invitationStatusColor[invite.status]}`}>{invite.status}</span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-xs font-normal"
-                                                onClick={() => handleCancelInvite(invite.id)}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                                    ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </PermissionGuard>
             )}
         </div>
     );

@@ -22,6 +22,7 @@ import {
     Save,
     AlertTriangle,
 } from "lucide-react";
+import { PermissionGuard } from "@/components/auth/permission-guard";
 
 export default function OrganizationSettingsPage() {
     const params = useParams();
@@ -117,85 +118,93 @@ export default function OrganizationSettingsPage() {
 
     return (
         <div className="space-y-6 max-w-2xl">
-            <Card>
-                <form onSubmit={handleUpdate}>
-                    <CardHeader>
-                        <CardTitle>General Settings</CardTitle>
-                        <CardDescription>
-                            Update your organization's display name and unique slug.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Organization Name</Label>
-                            <Input
-                                id="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="slug">Organization Slug</Label>
-                            <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground text-sm">/</span>
+            <PermissionGuard permission={{
+                organization: ["update"],
+            }}>
+                <Card>
+                    <form onSubmit={handleUpdate}>
+                        <CardHeader>
+                            <CardTitle>General Settings</CardTitle>
+                            <CardDescription>
+                                Update your organization's display name and unique slug.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Organization Name</Label>
                                 <Input
-                                    id="slug"
-                                    value={newSlug}
-                                    onChange={(e) => setNewSlug(e.target.value)}
+                                    id="name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                Slugs can only contain lowercase letters, numbers, and hyphens.
-                            </p>
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="slug">Organization Slug</Label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground text-sm">/</span>
+                                    <Input
+                                        id="slug"
+                                        value={newSlug}
+                                        onChange={(e) => setNewSlug(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Slugs can only contain lowercase letters, numbers, and hyphens.
+                                </p>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="border-t px-6 py-4">
+                            <Button type="submit" disabled={isUpdating}>
+                                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                <Save className="mr-2 h-4 w-4" />
+                                Save Changes
+                            </Button>
+                        </CardFooter>
+                    </form>
+                </Card>
+            </PermissionGuard>
+            <PermissionGuard permission={{
+                organization: ["delete"],
+            }}>
+
+                <Card className="border-red-200">
+                    <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5" />
+                            Danger Zone
+                        </CardTitle>
+                        <CardDescription>
+                            Irreversible actions that affect your organization and its data.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <p className="text-sm font-medium">Delete this organization</p>
+                        <p className="text-sm text-muted-foreground">
+                            Once you delete an organization, there is no going back. Please be certain.
+                            Type <span className="font-bold text-foreground">{organization?.name}</span> to confirm.
+                        </p>
+                        <Input
+                            placeholder="Type organization name..."
+                            className="border-red-200 focus-visible:ring-red-500"
+                            value={deleteConfirm}
+                            onChange={(e) => setDeleteConfirm(e.target.value)}
+                        />
                     </CardContent>
-                    <CardFooter className="border-t px-6 py-4">
-                        <Button type="submit" disabled={isUpdating}>
-                            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            <Save className="mr-2 h-4 w-4" />
-                            Save Changes
+                    <CardFooter className="border-t bg-red-50/50 px-6 py-4">
+                        <Button
+                            variant="destructive"
+                            disabled={isDeleting || deleteConfirm !== organization?.name}
+                            onClick={handleDelete}
+                        >
+                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Organization
                         </Button>
                     </CardFooter>
-                </form>
-            </Card>
-
-            <Card className="border-red-200">
-                <CardHeader>
-                    <CardTitle className="text-red-600 flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5" />
-                        Danger Zone
-                    </CardTitle>
-                    <CardDescription>
-                        Irreversible actions that affect your organization and its data.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-sm font-medium">Delete this organization</p>
-                    <p className="text-sm text-muted-foreground">
-                        Once you delete an organization, there is no going back. Please be certain.
-                        Type <span className="font-bold text-foreground">{organization?.name}</span> to confirm.
-                    </p>
-                    <Input
-                        placeholder="Type organization name..."
-                        className="border-red-200 focus-visible:ring-red-500"
-                        value={deleteConfirm}
-                        onChange={(e) => setDeleteConfirm(e.target.value)}
-                    />
-                </CardContent>
-                <CardFooter className="border-t bg-red-50/50 px-6 py-4">
-                    <Button
-                        variant="destructive"
-                        disabled={isDeleting || deleteConfirm !== organization?.name}
-                        onClick={handleDelete}
-                    >
-                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Organization
-                    </Button>
-                </CardFooter>
-            </Card>
+                </Card>
+            </PermissionGuard>
         </div>
     );
 }
