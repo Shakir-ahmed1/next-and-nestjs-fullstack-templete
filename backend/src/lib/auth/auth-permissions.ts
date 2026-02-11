@@ -1,4 +1,4 @@
-import { createAccessControl } from "better-auth/plugins";
+import { createAccessControl, organization } from "better-auth/plugins";
 import { adminAc, defaultStatements, ownerAc } from "better-auth/plugins/organization/access";
 
 /**
@@ -14,7 +14,6 @@ const customStatements = {
     production: ["create", "read"],
     requests: ["create", "read", "update"],
     members: ["create", "read", "update", "delete"],
-
 }
 const statement = {
     ...customStatements,
@@ -27,7 +26,7 @@ export const customAC = createAccessControl(statement);
  * 2. DEFINE ROLES
  * Assigning the granular permissions from the statement to each role.
  */
-export const customRoles = {
+export const customRoles1 = {
     owner: customAC.newRole({
         ...customStatements,
         ...ownerAc.statements
@@ -71,6 +70,24 @@ export const customRoles = {
     requester: customAC.newRole({
         requests: ["create", "read"],
     }),
+};
+
+export const customRoles = {
+    owner: customAC.newRole({
+        ...customStatements,
+        ...ownerAc.statements
+    }),
+    admin: customAC.newRole({
+        members: ["create", "read", "update", "delete"],
+        finance: ["read", "view_balance"],
+        sales: ["read", "update"],
+        assets: ["create", "read", "update", "delete"],
+        attendance: ["read", "update"],
+        ...adminAc.statements,
+    }),
+    guest: customAC.newRole({
+        members: ["read"],
+    })
 };
 
 /**

@@ -17,6 +17,7 @@ import {
     Activity,
     CreditCard
 } from "lucide-react";
+import { useOrganization } from "@/hooks/use-organization";
 
 export default function OrganizationOverviewPage() {
     const params = useParams();
@@ -26,18 +27,7 @@ export default function OrganizationOverviewPage() {
     const { data: activeOrg, isPending: isOrgPending } = authClient.useActiveOrganization();
 
 
-    const { data: organization } = useQuery({
-        queryKey: ["organization", slug],
-        queryFn: async () => {
-            const res = await authClient.organization.getFullOrganization({
-                query: {
-                    organizationSlug: slug
-                }
-            });
-            if (res.error) throw new Error(res.error.message);
-            return res.data;
-        }
-    });
+    const { data: organization } = useOrganization(slug);
 
     const stats = [
         {

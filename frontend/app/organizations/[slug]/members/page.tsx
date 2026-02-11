@@ -49,6 +49,7 @@ import { organizationRoles } from "../../roles";
 import { InvitationStatus } from "better-auth/plugins";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PermissionGuard } from "@/components/auth/permission-guard";
+import { useCurrentActiveOrgMember, useOrganization } from "@/hooks/use-organization";
 const invitationStatusColor: Record<InvitationStatus, string> = {
     pending: "bg-secondary text-secondary-foreground ring-border",
 
@@ -58,23 +59,22 @@ const invitationStatusColor: Record<InvitationStatus, string> = {
 
     canceled: "bg-muted text-muted-foreground ring-border",
 };
-
-
-export default function OrganizationMembersPage() {
-    const params = useParams();
-    const slug = params.slug as string;
-    const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-    const [inviteEmail, setInviteEmail] = useState("");
-    const [inviteRole, setInviteRole] = useState(organizationRoles.requester);
-    const [isInviting, setIsInviting] = useState(false);
-    const [showInvitationHistory, setShowInvtationHistory] = useState(false)
-
-    const { data: organization, isPending, refetch } = useQuery({
-        queryKey: ["organization-full", slug],
+function RoleSelect({
+    organizationId,
+    onValueChange,
+    value, // Add this
+}: {
+    organizationId?: string,
+    onValueChange: (value: string) => void,
+    value: string // Add this
+}) {
+    const { data: dynamicRoles } = useQuery({
+        queryKey: ["organization-roles", organizationId],
+        enabled: !!organizationId,
         queryFn: async () => {
-            const res = await authClient.organization.getFullOrganization({
+            const res = await authClient.organization.listRoles({
                 query: {
-                    organizationSlug: slug
+                    organizationId: organizationId
                 }
             });
             if (res.error) throw new Error(res.error.message);
@@ -82,7 +82,41 @@ export default function OrganizationMembersPage() {
         }
     });
 
-    const memberRolesList = Object.values(organizationRoles);
+    const staticRoles = Object.values(organizationRoles);
+    const dynamicRolesList = dynamicRoles?.map(r => r.role) || [];
+    const memberRolesList = [...staticRoles, ...dynamicRolesList];
+
+    return (
+        <Select
+            value={value} // Switch from defaultValue to value
+            onValueChange={onValueChange}
+        >
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                {memberRolesList.map((role) => (
+                    <SelectItem key={role} value={role} className="text-xs">
+                        {role}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    )
+}
+
+
+export default function OrganizationMembersPage() {
+    const params = useParams();
+    const slug = params.slug as string;
+    const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState("");
+    const [inviteRole, setInviteRole] = useState(organizationRoles.guest);
+    const [isInviting, setIsInviting] = useState(false);
+    const [showInvitationHistory, setShowInvtationHistory] = useState(false);
+    const currentActiveOrgMember = useCurrentActiveOrgMember();
+
+    const { data: organization, isPending, refetch } = useOrganization(slug)
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -144,21 +178,27 @@ export default function OrganizationMembersPage() {
         }
     };
 
-    const handleUpdateRole = async (memberId: string, newRole: string) => {
+    const handleUpdateRole = async (memberId: string, newRole: string, oldRole: string) => {
+        // 1. (Optional) Optimistically update UI or just let the async call run
+
         try {
             const res = await authClient.organization.updateMemberRole({
                 memberId,
                 role: newRole as any,
                 organizationId: organization?.id!,
             });
+
             if (res.error) {
                 toast.error(res.error.message);
+                // The value won't change in the UI if you are controlling it 
+                // and don't trigger a state update/refetch here.
             } else {
                 toast.success("Role updated successfully");
                 refetch();
             }
         } catch (err: any) {
             toast.error(err.message || "Failed to update role");
+            // If you used optimistic updates, revert the state here
         }
     };
 
@@ -211,18 +251,7 @@ export default function OrganizationMembersPage() {
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="role">Role</Label>
-                                        <Select value={inviteRole} onValueChange={setInviteRole}>
-                                            <SelectTrigger id="role">
-                                                <SelectValue placeholder="Select a role" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {memberRolesList.map((role) => (
-                                                    <SelectItem key={role} value={role}>
-                                                        {role}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <RoleSelect organizationId={organization?.id} onValueChange={(value) => setInviteRole(value)} value={inviteRole} />
                                     </div>
                                 </div>
                                 <DialogFooter>
@@ -265,21 +294,12 @@ export default function OrganizationMembersPage() {
                                     members: ["update", "delete"],
                                 }}>
                                     <div className="flex items-center gap-4">
-                                        <Select
-                                            defaultValue={member.role}
-                                            onValueChange={(val: string) => handleUpdateRole(member.id, val)}
-                                        >
-                                            <SelectTrigger className="w-[140px] h-8 text-xs">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {memberRolesList.map((role) => (
-                                                    <SelectItem key={role} value={role} className="text-xs">
-                                                        {role}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <RoleSelect
+                                            key={member.id}
+                                            value={member.role} // This comes from your server data
+                                            onValueChange={(newValue) => handleUpdateRole(member.id, newValue, member.role)}
+                                            organizationId={organization.id}
+                                        />
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -381,3 +401,5 @@ export default function OrganizationMembersPage() {
         </div>
     );
 }
+
+

@@ -52,6 +52,9 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
             organization({
                 ac: customAC,
                 roles: customRoles,
+                dynamicAccessControl: {
+                    enabled: true,
+                },
                 // Allowing users to belong to multiple sites (Organizations)
                 allowMultipleOrganizations: true,
                 // Creating an organization creator role by default

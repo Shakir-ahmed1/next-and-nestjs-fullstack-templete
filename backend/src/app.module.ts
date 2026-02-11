@@ -12,6 +12,7 @@ import { UploadImage } from './lib/media/uploads/entities/upload-image.entity';
 import { Organization } from './lib/auth/entities/organization.entity';
 import { Member } from './lib/auth/entities/member.entity';
 import { Invitation } from './lib/auth/entities/invitation.entity';
+import { OrganizationRole } from './lib/auth/entities/organization-role.entity';
 import { MediaModule } from './lib/media/media.module';
 import { TodoModule } from './todo/todo.module';
 import { Todo } from './todo/entities/todo.entity';
@@ -87,7 +88,7 @@ import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.inter
     }),
     AuthModule.forRootAsync({
       isGlobal: true,
-      imports: [TypeOrmModule.forFeature([User, Account, Session, Verification, Organization, Member, Invitation])],
+      imports: [TypeOrmModule.forFeature([User, Account, Session, Verification, Organization, Member, Invitation, OrganizationRole])],
       inject: [ConfigService, DataSource],
       useFactory: (config: ConfigService, dataSource: DataSource) => ({
         auth: getBetterAuthConfig(config, dataSource),
@@ -106,6 +107,7 @@ import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.inter
       Organization,
       Member,
       Invitation,
+      OrganizationRole,
     ])
   ],
   controllers: [HealthController],

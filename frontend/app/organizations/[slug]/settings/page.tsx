@@ -23,6 +23,7 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import { PermissionGuard } from "@/components/auth/permission-guard";
+import { useOrganization } from "@/hooks/use-organization";
 
 export default function OrganizationSettingsPage() {
     const params = useParams();
@@ -35,18 +36,7 @@ export default function OrganizationSettingsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState("");
 
-    const { data: organization, isPending, refetch } = useQuery({
-        queryKey: ["organization-settings", slug],
-        queryFn: async () => {
-            const res = await authClient.organization.getFullOrganization({
-                query: {
-                    organizationSlug: slug
-                }
-            });
-            if (res.error) throw new Error(res.error.message);
-            return res.data;
-        }
-    });
+    const { data: organization, isPending, refetch } = useOrganization(slug);
 
     useEffect(() => {
         if (organization) {

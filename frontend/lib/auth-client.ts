@@ -13,6 +13,9 @@ export const authClient = createAuthClient({
             {
                 ac: customAC,
                 roles: customRoles,
+                dynamicAccessControl: {
+                    enabled: true,
+                },
             }
         ),
     ],
