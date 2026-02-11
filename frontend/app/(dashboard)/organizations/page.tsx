@@ -260,7 +260,7 @@ export default function UserOrganizationsPage() {
                                         </Avatar>
                                         <div>
                                             <CardTitle className="text-lg">{invite.organizationName}</CardTitle>
-                                            <CardDescription>Invited you as {invite.role}</CardDescription>
+                                            <CardDescription>Invited you as <span className="capitalize font-semibold">{invite.role}</span></CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>

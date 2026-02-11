@@ -1,5 +1,4 @@
 import React from "react";
-import NavSideContainer from "@/components/nav-side-container";
 import { requireAuth } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 
@@ -10,5 +9,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         redirect("/");
     }
 
-    return <NavSideContainer>{children}</NavSideContainer>;
+    return <>{children}</>;
 }

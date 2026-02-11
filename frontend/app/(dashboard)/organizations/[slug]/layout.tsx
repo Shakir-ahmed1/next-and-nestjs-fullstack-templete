@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import NavSideContainer from "@/components/nav-side-container";
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
