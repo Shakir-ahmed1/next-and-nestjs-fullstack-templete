@@ -11,12 +11,13 @@ export default async function NavSideContainer({
 }) {
   const session = await requireAuth()
 
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1 overflow-hidden">
         <DashboardHeader />
-        <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        <div className="container mx-auto px-2 py-4 md:px-3 lg:px-4">
           {children}
         </div>
       </main>

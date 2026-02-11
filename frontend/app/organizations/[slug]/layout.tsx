@@ -78,8 +78,8 @@ export default function OrganizationLayout({ children }: { children: React.React
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col gap-4 border-b pb-6">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 border-b pb-2">
+                {/* <div className="flex items-center gap-4">
                     <Avatar className="h-16 w-16 rounded-lg">
                         <AvatarImage src={organization.logo || ""} />
                         <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-2xl">
@@ -88,9 +88,9 @@ export default function OrganizationLayout({ children }: { children: React.React
                     </Avatar>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">{organization.name}</h1>
-                        <p className="text-muted-foreground">/{organization.slug}</p>
+                        <p className="text-muted-foreground">/{organization.slug}aa</p>
                     </div>
-                </div>
+                </div> */}
 
                 <nav className="flex space-x-2">
                     {navItems.map((item) => {

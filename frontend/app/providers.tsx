@@ -9,9 +9,20 @@ import { Toaster } from "sonner";
 
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
+import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  const { data: activeOrg, refetch } = authClient.useActiveOrganization();
+  const handleSetActiveOrg = async (orgSlug: string) => {
+    await authClient.organization.setActive({
+      organizationSlug: orgSlug,
+    });
+    await refetch();
+    redirect(`/organizations/${orgSlug}`);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -22,7 +33,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <Toaster />
+        <ActiveOrganizationContext.Provider value={{ handleSetActiveOrg, activeOrg }}>  
         {children}
+
+        </ActiveOrganizationContext.Provider>
         {NEXT_PUBLIC_NODE_ENV === 'development' &&
           <>
             <ReactQueryDevtools initialIsOpen={false} />

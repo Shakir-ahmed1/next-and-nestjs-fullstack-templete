@@ -26,7 +26,7 @@ import {
     AvatarFallback,
     AvatarImage
 } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "sonner";
 import {
     Building2,
@@ -43,6 +43,9 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useUserProfile } from "@/hooks/use-profile";
 import AdminUsersOnly from "@/components/access-control/admin-users-only";
+import { redirect } from "next/navigation";
+import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
+import { useUserMemberships } from "@/hooks/use-memberships";
 
 export default function UserOrganizationsPage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -51,16 +54,18 @@ export default function UserOrganizationsPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [slugAlreadyExist, setSlugAlreadyExist] = useState(false);
     const { data: currentUser } = useUserProfile()
+    const { activeOrg, handleSetActiveOrg } = useContext(ActiveOrganizationContext)
+    // const { data: organizations, isPending, error, refetch } = useQuery({
+    //     queryKey: ["user-organizations"],
 
-    const { data: organizations, isPending, error, refetch } = useQuery({
-        queryKey: ["user-organizations"],
+    //     queryFn: async () => {
+    //         const res = await authClient.organization.list();
+    //         if (res.error) throw new Error(res.error.message);
+    //         return res.data;
+    //     }
+    // });
+        const { data: memberships, isPending, error, refetch } = useUserMemberships()
 
-        queryFn: async () => {
-            const res = await authClient.organization.list();
-            if (res.error) throw new Error(res.error.message);
-            return res.data;
-        }
-    });
 
     const { data: invitations, refetch: refetchUserInvitations } = useQuery({
         queryKey: ["user-invitations", currentUser?.name],
@@ -70,7 +75,7 @@ export default function UserOrganizationsPage() {
             return res.data;
         }
     });
-    
+
 
     const handleAcceptInvite = async (invitationId: string) => {
         try {
@@ -164,7 +169,7 @@ export default function UserOrganizationsPage() {
                         Manage your organizations and memberships.
                     </p>
                 </div>
-                
+
                 <AdminUsersOnly><Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                     <DialogTrigger asChild>
                         <Button className="w-full md:w-auto">
@@ -287,7 +292,7 @@ export default function UserOrganizationsPage() {
                             </Card>
                         ))}
                     </div>
-                ) : organizations?.length === 0 ? (
+                ) : memberships?.length === 0 ? (
                     <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
                         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
                             <Building2 className="h-10 w-10 text-muted-foreground" />
@@ -299,7 +304,7 @@ export default function UserOrganizationsPage() {
                     </Card>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {organizations?.map((org) => (
+                        {memberships?.map(({role, organization: org}) => (
                             <Card key={org.id} className="overflow-hidden hover:shadow-md transition-shadow">
                                 <CardHeader className="pb-4">
                                     <div className="flex items-center gap-3">
@@ -320,30 +325,28 @@ export default function UserOrganizationsPage() {
                                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                                             <div className="flex items-center gap-1">
                                                 <Users className="h-4 w-4" />
-                                                <span>Management</span>
+                                                <span className="capitalize">{role}</span>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <Button asChild variant="outline" size="sm" className="flex-1">
+                                            <Button asChild variant="outline" size="sm" className="flex-1" onClick={() => handleSetActiveOrg(org.slug)}>
                                                 <Link href={`/organizations/${org.slug}`}>
                                                     <ArrowRight className="mr-2 h-4 w-4" />
                                                     View
                                                 </Link>
                                             </Button>
-                                            <Button asChild variant="ghost" size="icon" className="h-9 w-9">
-                                                <Link href={`/organizations/${org.slug}/settings`}>
-                                                    <Settings className="h-4 w-4" />
-                                                </Link>
-                                            </Button>
-                                        </div>
-                                    </div>
+                                </div>
+                            </div>
                                 </CardContent>
                             </Card>
                         ))}
-                    </div>
-                )}
-            </div>
         </div>
+    )
+}
+            </div >
+        </div >
     );
 }
+
+
 

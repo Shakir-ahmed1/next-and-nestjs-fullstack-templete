@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { OrganizationRole } from './organization-role.entity';
+import { Member } from './member.entity';
 
 @Entity('organization')
 export class Organization {
@@ -26,4 +27,7 @@ export class Organization {
 
     @OneToMany(() => OrganizationRole, (role) => role.organization)
     roles: OrganizationRole[];
+
+    @OneToMany(() => Member, (member) => member.organization)
+    members: Member[];
 }

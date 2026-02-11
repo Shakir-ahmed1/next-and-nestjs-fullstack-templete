@@ -8,9 +8,12 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useUserProfile } from "@/hooks/use-profile";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -26,11 +29,12 @@ import {
   Building2,
   ChevronsUpDown,
   Plus,
+  PanelLeft,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { authClient, handleSignOut } from "@/lib/auth-client";
+import { handleSignOut } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -41,9 +45,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { redirect } from "next/navigation";
+import Image from "next/image";
+import { Fragment } from "react/jsx-runtime";
 
 const menuItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/" },
+  { title: "Organizations", icon: Building2, href: "/organizations" },
+  // { title: "Dashboard", icon: LayoutDashboard, href: "/" },
   {
     title: "Analytics",
     icon: BarChart3,
@@ -69,21 +76,15 @@ const menuItems = [
     permission: { sales: ["read"] } as const
   },
   { title: "Settings", icon: Settings, href: "/dashboard/settings" },
-  { title: "Organizations", icon: Building2, href: "/organizations" },
 ];
 
 export function AppSidebar() {
   const { data: user, isLoading } = useUserProfile();
-  const { data: activeOrg, isPending: isOrgPending } = authClient.useActiveOrganization();
-  const { data: organizations } = authClient.useListOrganizations();
   const { hasPermission } = usePermissions();
+  const { state, toggleSidebar } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
-  const handleSetActiveOrg = async (orgSlug: string) => {
-    await authClient.organization.setActive({
-      organizationSlug: orgSlug,
-    });
-    redirect(`/organizations/${orgSlug}`);
-  };
+
 
   const filteredMenuItems = menuItems.filter(item => {
     if (!item.permission) return true;
@@ -93,76 +94,60 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <SidebarGroup className="border-b">
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    {activeOrg ? (
-                      <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src={activeOrg.logo || undefined} />
-                        <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                          {activeOrg.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <Building2 className="size-4" />
-                    )}
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold uppercase text-xs">
-                      {activeOrg?.name || "Select Organization"}
-                    </span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                align="start"
-                side="bottom"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  Organizations
-                </DropdownMenuLabel>
-                {organizations?.map((org) => (
-                  <DropdownMenuItem
-                    key={org.slug}
-                    onClick={() => handleSetActiveOrg(org.slug)}
-                    className="gap-2 p-2"
-                  >
-                    <div className="flex size-6 items-center justify-center rounded-sm border">
-                      <Avatar className="h-4 w-4 rounded-sm">
-                        <AvatarImage src={org.logo || undefined} />
-                        <AvatarFallback className="text-[10px]">
-                          {org.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    {org.name}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/organizations" className="flex items-center gap-2 p-2">
-                    <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                      <Plus className="size-4" />
-                    </div>
-                    <div className="font-medium text-muted-foreground">
-                      Manage Organizations
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
+        <SidebarHeader className="border-b">
 
-        </SidebarGroup>
+
+
+          {/* <SidebarMenu>
+              <SidebarMenuItem>
+              <SidebarTrigger></SidebarTrigger>
+              <SidebarGroupLabel className="text-lg font-semibold">
+                Native
+              </SidebarGroupLabel>
+
+            </SidebarMenu> */}
+          <SidebarMenuItem className="list-none">
+            {/* We use a div instead of SidebarMenuButton as the wrapper 
+      to avoid the 'asChild' single-element restriction.
+    */}
+            <div className="group relative flex h-12 justify-between items-center px-2">
+
+              {/* 1. THE LOGO & TEXT AREA */}
+              <>
+                <Link
+                  href="/"
+                  className={`flex items-center gap-2 transition-opacity duration-200 ${isCollapsed ? "group-hover:opacity-0" : "opacity-100"
+                    }`}
+                >
+                  <Image src="/native-logo-2.png" alt="Logo" width={24} height={24} className="shrink-0" />
+                  {state === "expanded" && (
+                    <span className="font-semibold whitespace-nowrap">Native PLC</span>
+                  )}
+                </Link>
+
+                {/* 2. THE COLLAPSED HOVER TRIGGER */}
+                {isCollapsed && (
+                  <button
+                    onClick={toggleSidebar}
+                    className="absolute h-6 w-6 flex items-center justify-center rounded-md border bg-background opacity-0 transition-opacity group-hover:opacity-100 hover:bg-accent"
+                    title="Expand Sidebar"
+                  >
+                    <PanelLeft className="h-4 w-4" />
+                  </button>
+                )}
+              </>
+
+              {/* 3. THE EXPANDED TRIGGER (Standard shadcn position) */}
+              {!isCollapsed && (
+                <Fragment >
+                <SidebarTrigger className="h-6 w-6" />
+                </Fragment>
+              )}
+
+            </div>
+          </SidebarMenuItem>          {/* </SidebarMenuItem> */}
+
+        </SidebarHeader>
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold">
             My App

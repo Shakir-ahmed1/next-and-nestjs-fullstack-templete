@@ -91,7 +91,12 @@ function RoleSelect({
             value={value} // Switch from defaultValue to value
             onValueChange={onValueChange}
         >
-            <SelectTrigger className="w-[140px] h-8 text-xs">
+            <SelectTrigger
+                className="h-8 text-xs w-full 
+                           min-w-25 max-w-27
+                           md:min-w-25 md:max-w-30"
+            >
+
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>

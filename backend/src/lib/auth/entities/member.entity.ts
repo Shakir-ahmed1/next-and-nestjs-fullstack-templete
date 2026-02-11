@@ -1,4 +1,5 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Organization } from './organization.entity';
 
 @Entity('member')
 export class Member {
@@ -19,4 +20,8 @@ export class Member {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @ManyToOne(() => Organization, (organization) => organization.members, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'organizationId' })
+    organization: Organization;
 }
