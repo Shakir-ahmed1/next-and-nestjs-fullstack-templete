@@ -1,5 +1,5 @@
 
-import { Entity, PrimaryColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { Session } from '../../auth/entities/session.entity';
 import { Account } from '../../auth/entities/account.entity';
 
@@ -36,6 +36,10 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @DeleteDateColumn()
+    deletedAt: Date;
+
 
     @OneToMany(() => Session, (session) => session.user)
     sessions: Session[];

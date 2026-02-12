@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 import { OrganizationRole } from './organization-role.entity';
 import { Member } from './member.entity';
 
@@ -24,6 +24,9 @@ export class Organization {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @DeleteDateColumn()
+    deletedAt: Date;
 
     @OneToMany(() => OrganizationRole, (role) => role.organization)
     roles: OrganizationRole[];

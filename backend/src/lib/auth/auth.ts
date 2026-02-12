@@ -1,6 +1,5 @@
 
 import { betterAuth, Path } from "better-auth";
-import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
@@ -8,6 +7,7 @@ import { openAPI, admin, organization, createAccessControl } from "better-auth/p
 import { COOKIE_PREFIX } from "./auth.config";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../utils/send-email";
 import { customAC, customRoles } from "./auth-permissions";
+import { typeormAdapter } from "./typeorm-adapter-auth";
 
 const logger = new Logger('BetterAuth');
 
@@ -18,7 +18,9 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
             configService.get('PUBLIC_URL', ''),
             `http://localhost:${configService.get('FRONTEND_PORT')}`,
         ],
-        database: typeormAdapter(dataSource),
+        database: typeormAdapter(dataSource, {
+            softDeleteEnabledEntities: ['user', 'member', 'organization'],
+        }),
         emailAndPassword: {
             enabled: true,
             sendResetPassword: sendResetPasswordEmail,
@@ -63,7 +65,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
                     return user.role === 'admin'
                 },
 
-            })
+            }),
         ],
         advanced: {
             cookiePrefix: COOKIE_PREFIX,
