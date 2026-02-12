@@ -106,8 +106,10 @@ export function DashboardHeader() {
           />
         </div>
 
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" >
+          <Link href="/notifications" aria-label="Notifications">
+            <Bell className="h-5 w-5" />
+          </Link>
         </Button>
 
         <Button

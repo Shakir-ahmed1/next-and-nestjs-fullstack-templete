@@ -5,6 +5,14 @@ export const NEXT_PUBLIC_NGINX_HOST_NAME = process.env.NEXT_PUBLIC_NGINX_HOST_NA
 export const NEXT_PUBLIC_NGINX_PORT = process.env.NEXT_PUBLIC_NGINX_PORT || '8084';
 export const NEXT_PUBLIC_NODE_ENV = process.env.NEXT_PUBLIC_NODE_ENV
 export const dashboardPageUri = "/organizations"
+
+export const companyInfo = {
+    name: 'Twin-Commerce',
+    description: 'Twin-Commerce is a modern e-commerce platform with separated frontend and backend.',
+    slug: 'twin-commerce',
+    domain: 'twin-commerce.com',
+    email: 'support@twin-commerce.com',
+}
 // Port Configuration
 // export const NEXT_PUBLIC_BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '3000';
 // export const FRONTEND_PORT = process.env.FRONTEND_PORT || '3001';

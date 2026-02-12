@@ -46,6 +46,7 @@ import AdminUsersOnly from "@/components/access-control/admin-users-only";
 import { redirect } from "next/navigation";
 import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
 import { useUserMemberships } from "@/hooks/use-memberships";
+import { ListInvitations } from "@/components/list-invitations";
 
 export default function UserOrganizationsPage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -53,62 +54,10 @@ export default function UserOrganizationsPage() {
     const [newOrgSlug, setNewOrgSlug] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [slugAlreadyExist, setSlugAlreadyExist] = useState(false);
-    const { data: currentUser } = useUserProfile()
     const { activeOrg, handleSetActiveOrg } = useContext(ActiveOrganizationContext)
-    // const { data: organizations, isPending, error, refetch } = useQuery({
-    //     queryKey: ["user-organizations"],
 
-    //     queryFn: async () => {
-    //         const res = await authClient.organization.list();
-    //         if (res.error) throw new Error(res.error.message);
-    //         return res.data;
-    //     }
-    // });
-        const { data: memberships, isPending, error, refetch } = useUserMemberships()
+    const { data: memberships, isPending, error, refetch: refetchMemberships } = useUserMemberships()
 
-
-    const { data: invitations, refetch: refetchUserInvitations } = useQuery({
-        queryKey: ["user-invitations", currentUser?.name],
-        queryFn: async () => {
-            const res = await authClient.organization.listUserInvitations();
-            if (res.error) throw new Error(res.error.message);
-            return res.data;
-        }
-    });
-
-
-    const handleAcceptInvite = async (invitationId: string) => {
-        try {
-            const res = await authClient.organization.acceptInvitation({
-                invitationId
-            });
-            if (res.error) {
-                toast.error(res.error.message);
-            } else {
-                toast.success("Invitation accepted");
-                refetch();
-                refetchUserInvitations();
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Failed to accept invitation");
-        }
-    };
-
-    const handleRejectInvite = async (invitationId: string) => {
-        try {
-            const res = await authClient.organization.rejectInvitation({
-                invitationId
-            });
-            if (res.error) {
-                toast.error(res.error.message);
-            } else {
-                toast.success("Invitation rejected");
-                refetchUserInvitations();
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Failed to reject invitation");
-        }
-    };
 
     const handleCreateOrganization = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -132,7 +81,7 @@ export default function UserOrganizationsPage() {
                 setIsCreateDialogOpen(false);
                 setNewOrgName("");
                 setNewOrgSlug("");
-                refetch();
+                refetchMemberships();
             }
         } catch (err: any) {
             toast.error(err.message || "Failed to create organization");
@@ -242,41 +191,7 @@ export default function UserOrganizationsPage() {
                 </AdminUsersOnly>
             </div>
 
-            {invitations && invitations.length > 0 && (
-                <div className="space-y-4">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-primary" />
-                        Pending Invitations ({invitations.length})
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {invitations.map((invite) => (
-                            <Card key={invite.id} className="border-primary/20 bg-primary/5">
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarFallback className="bg-primary/20 text-primary">
-                                                {invite.organizationName.charAt(0)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <CardTitle className="text-lg">{invite.organizationName}</CardTitle>
-                                            <CardDescription>Invited you as <span className="capitalize font-semibold">{invite.role}</span></CardDescription>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardFooter className="flex gap-2 pt-0">
-                                    <Button size="sm" className="flex-1" onClick={() => handleAcceptInvite(invite.id)}>
-                                        Accept
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="flex-1" onClick={() => handleRejectInvite(invite.id)}>
-                                        Reject
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <ListInvitations onAcceptInvitation={() => refetchMemberships()} />
 
             <div className="space-y-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -304,7 +219,7 @@ export default function UserOrganizationsPage() {
                     </Card>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {memberships?.map(({role, organization: org}) => (
+                        {memberships?.map(({ role, organization: org }) => (
                             <Card key={org.id} className="overflow-hidden hover:shadow-md transition-shadow">
                                 <CardHeader className="pb-4">
                                     <div className="flex items-center gap-3">
@@ -335,14 +250,14 @@ export default function UserOrganizationsPage() {
                                                     View
                                                 </Link>
                                             </Button>
-                                </div>
-                            </div>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))}
-        </div>
-    )
-}
+                    </div>
+                )
+                }
             </div >
         </div >
     );

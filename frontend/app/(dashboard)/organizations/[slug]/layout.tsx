@@ -12,7 +12,8 @@ import {
     LayoutDashboard,
     Building2,
     Loader2,
-    Shield
+    Shield,
+    User
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PermissionGuard } from "@/components/auth/permission-guard";
@@ -52,6 +53,11 @@ export default function OrganizationLayout({ children }: { children: React.React
             permissions: {
                 organization: ["delete", "update"]
             }
+        },
+        {
+            title: "My Info",
+            href: `/organizations/${slug}/my-info`,
+            icon: User,
         },
     ];
 
