@@ -39,6 +39,7 @@ import api from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 interface Organization {
     id: string;
@@ -85,7 +86,13 @@ export default function AdminOrganizationsPage() {
 
         setIsDeleting(true);
         try {
-            await api.delete(`/admin/organizations/${orgToDelete.id}`);
+            const { data, error } = await authClient.organization.delete({
+                organizationId: orgToDelete.id, // required
+            });
+            if (error) {
+                toast.error(error.message || "Failed to delete organization");
+                return;
+            }
             toast.success("Organization deleted successfully");
             refetch();
             setOrgToDelete(null);

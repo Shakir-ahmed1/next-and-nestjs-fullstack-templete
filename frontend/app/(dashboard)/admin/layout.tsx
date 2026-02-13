@@ -1,11 +1,12 @@
 import React from "react";
 import { requireAuth } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
+import { canAccessAdminPage } from "@/lib/admin-helpers";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-    const session = await requireAuth();
+    const { user }= await requireAuth();
 
-    if (session.user.role !== "admin") {
+    if (!(canAccessAdminPage(user.role))) {
         redirect("/");
     }
 

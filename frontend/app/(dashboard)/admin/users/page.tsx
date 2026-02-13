@@ -38,12 +38,14 @@ import {
     ArrowUp,
     ArrowDown,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    KeyRound,
+    Key
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useUserProfile } from "@/hooks/use-profile";
 import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
+import { rolePower, UserPermissionGuard } from "@/components/auth/user-permission-guard";
 
 export default function AdminUsersPage() {
     const [limit, setLimit] = useState(10);
@@ -60,6 +62,10 @@ export default function AdminUsersPage() {
         data?: any;
     } | null>(null);
     const [isActionPending, setIsActionPending] = useState(false);
+    const session = authClient.useSession();
+    const currentUser = session.data?.user;
+    const currentUserRole = currentUser?.role as keyof typeof rolePower || "user";
+    const currentPower = rolePower[currentUserRole] ?? 0;
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -162,8 +168,7 @@ export default function AdminUsersPage() {
         }
     };
 
-    const handleSetRole = async (userId: string, currentRole: string, skipConfirm = false) => {
-        const newRole = currentRole === "admin" ? "user" : "admin";
+    const handleSetRole = async (userId: string, currentRole: string, newRole: string, skipConfirm = false) => {
 
         if (!confirmDisabled && !skipConfirm) {
             const user = users.find(u => u.id === userId);
@@ -203,7 +208,7 @@ export default function AdminUsersPage() {
                 handleDeleteUser(actionToConfirm.userId, true);
                 break;
             case "role":
-                handleSetRole(actionToConfirm.userId, actionToConfirm.data.currentRole, true);
+                handleSetRole(actionToConfirm.userId, actionToConfirm.data.currentRole, actionToConfirm.data.newRole, true);
                 break;
         }
     };
@@ -325,75 +330,119 @@ export default function AdminUsersPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    users.map((user) => (
-                                        <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-9 w-9">
-                                                        <AvatarImage src={user.image || ""} />
-                                                        <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">{user.name}</span>
-                                                        <span className="text-xs text-muted-foreground">{user.email}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.role === "admin"
-                                                    ? "bg-primary/10 text-primary"
-                                                    : "bg-muted text-muted-foreground"
-                                                    }`}>
-                                                    {user.role}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.banned
-                                                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                                    : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                    }`}>
-                                                    {user.banned ? "Banned" : "Active"}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    {user.role !== "admin" && (
-                                                        <>
-                                                            <Button
-                                                                variant="outline"
-                                                                size="icon"
-                                                                title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
-                                                                onClick={() => handleSetRole(user.id, user.role || "user")}
-                                                            >
-                                                                {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
-                                                            </Button>
+                                    <>{
+                                        users
+                                            .filter((user) => {
+                                                if (user.id === currentUser?.id) return true;
+                                                const targetRole = user.role as keyof typeof rolePower || "user";
+                                                const targetPower = rolePower[targetRole] ?? 0;
 
-                                                            <Button
-                                                                variant="outline"
-                                                                size="icon"
-                                                                className={user.banned ? "text-green-600 hover:text-green-700" : "text-amber-600 hover:text-amber-700"}
-                                                                title={user.banned ? "Unban User" : "Ban User"}
-                                                                onClick={() => handleBanUser(user.id, user.banned || false)}
-                                                            >
-                                                                {user.banned ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
-                                                            </Button>
+                                                // Visibility Logic:
+                                                // user, admin (0, 1) -> seen by admin+ (power >= 1)
+                                                // owner, super_owner (2, 3) -> seen by super_owner (power >= 3)
+                                                if (targetPower <= 1) return currentPower >= 1;
+                                                if (targetPower >= 2) return currentPower >= 3;
+                                                return false;
+                                            })
+                                            .map((user) => (
+                                                <tr key={user.id} className="hover:bg-muted/30 transition-colors">
+                                                    <td className="px-4 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar className="h-9 w-9">
+                                                                <AvatarImage src={user.image || ""} />
+                                                                <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-medium">{user.name}</span>
+                                                                <span className="text-xs text-muted-foreground">{user.email}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.role === "admin"
+                                                            ? "bg-primary/10 text-primary"
+                                                            : user.role === "owner" || user.role === "super_owner"
+                                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                                                : "bg-muted text-muted-foreground"
+                                                            }`}>
+                                                            {user.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.banned
+                                                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                            : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                            }`}>
+                                                            {user.banned ? "Banned" : "Active"}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            {(() => {
+                                                                const targetRole = user.role as keyof typeof rolePower || "user";
+                                                                const targetPower = rolePower[targetRole] ?? 0;
 
-                                                            <Button
-                                                                variant="outline"
-                                                                size="icon"
-                                                                className="text-red-600 hover:text-red-700"
-                                                                title="Delete User"
-                                                                onClick={() => handleDeleteUser(user.id)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
+                                                                // Action Logic:
+                                                                // super_owner can be acted on by none
+                                                                if (targetRole === 'super_owner') return null;
+
+                                                                // target can be acted on by someone with strictly higher power
+                                                                if (currentPower >= targetPower + 1) {
+                                                                    return (
+                                                                        <>
+                                                                            {(currentUserRole === 'super_owner' && (user.role === 'owner' || user.role === 'admin')) && <Button
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                title={user.role === "owner" ? "Demote to User" : "Promote to owner"}
+                                                                                onClick={() => handleSetRole(user.id, user.role as string, user.role === "owner" ? "admin" : "owner")}
+                                                                            >
+                                                                                {user.role === "owner" ? (
+                                                                                    <KeyRound className="h-4 w-4 text-amber-500" />
+                                                                                ) : (
+                                                                                    <Key className="h-4 w-4 opacity-40" />
+                                                                                )}                                                                            </Button>}
+
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
+                                                                                onClick={() => handleSetRole(user.id, user.role, user.role === "admin" ? "user" : "admin")}
+                                                                            >
+                                                                                {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                                                                            </Button>
+
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                className={user.banned ? "text-green-600 hover:text-green-700" : "text-amber-600 hover:text-amber-700"}
+                                                                                title={user.banned ? "Unban User" : "Ban User"}
+                                                                                onClick={() => handleBanUser(user.id, user.banned || false)}
+                                                                            >
+                                                                                {user.banned ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
+                                                                            </Button>
+
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                className="text-red-600 hover:text-red-700"
+                                                                                title="Delete User"
+                                                                                onClick={() => handleDeleteUser(user.id)}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </>
+                                                                    );
+                                                                }
+                                                                return null;
+                                                            })()}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                    }</>
+                                )
+                                }
+
                             </tbody>
                         </table>
                     </div>
@@ -467,10 +516,10 @@ export default function AdminUsersPage() {
                             {actionToConfirm?.type === "role" && "Change User Role"}
                         </DialogTitle>
                         <DialogDescription>
-                            {actionToConfirm?.type === "ban" && <div>Are you sure you want to ban <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? They will no longer be able to sign in.</div>}
-                            {actionToConfirm?.type === "unban" && <div>Are you sure you want to unban <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? </div>}
-                            {actionToConfirm?.type === "delete" && <div>Are you sure you want to delete <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? This action cannot be undone.</div>}
-                            {actionToConfirm?.type === "role" && <div>Are you sure you want to change <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>'s role from <span className="font-bold">{actionToConfirm.data?.currentRole}</span> to <span className="font-medium">{actionToConfirm.data?.newRole}</span>? </div>}
+                            {actionToConfirm?.type === "ban" && <span>Are you sure you want to ban <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? They will no longer be able to sign in.</span>}
+                            {actionToConfirm?.type === "unban" && <span>Are you sure you want to unban <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? </span>}
+                            {actionToConfirm?.type === "delete" && <span>Are you sure you want to delete <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>? This action cannot be undone.</span>}
+                            {actionToConfirm?.type === "role" && <span>Are you sure you want to change <span className="font-bold text-gray-800">{actionToConfirm.userName}</span>'s role from <span className="font-bold">{actionToConfirm.data?.currentRole}</span> to <span className="font-medium">{actionToConfirm.data?.newRole}</span>? </span>}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -494,6 +543,6 @@ export default function AdminUsersPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

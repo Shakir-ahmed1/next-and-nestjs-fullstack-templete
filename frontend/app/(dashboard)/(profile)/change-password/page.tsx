@@ -28,8 +28,8 @@ export default function ChangePassword() {
         }
 
         const { data, error } = await authClient.changePassword({
-            newPassword: oldPassword, // required
-            currentPassword: newPassword, // required
+            newPassword: newPassword, // required
+            currentPassword: oldPassword, // required
             revokeOtherSessions: true,
         }, {
             onRequest: () => {

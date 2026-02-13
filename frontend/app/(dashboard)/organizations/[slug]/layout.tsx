@@ -16,7 +16,7 @@ import {
     User
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PermissionGuard } from "@/components/auth/permission-guard";
+import { MemberPermissionGuard } from "@/components/auth/member-permission-guard";
 import { useOrganization } from "@/hooks/use-organization";
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
@@ -101,7 +101,7 @@ export default function OrganizationLayout({ children }: { children: React.React
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
-                            <PermissionGuard permission={item.permissions} key={item.href}>
+                            <MemberPermissionGuard permission={item.permissions} key={item.href}>
                                 <Link
 
                                     href={item.href}
@@ -115,7 +115,7 @@ export default function OrganizationLayout({ children }: { children: React.React
                                     <item.icon className="h-4 w-4" />
                                     {item.title}
                                 </Link>
-                            </PermissionGuard>
+                            </MemberPermissionGuard>
                         );
                     })}
                 </nav>

@@ -1,10 +1,10 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { customRoles } from "@/lib/auth-permissions";
+import { customMemberRoles } from "@/lib/auth-member-permissions";
 import React from "react";
 
-export function usePermissions() {
+export function useMemberPermissions() {
     const { data: activeOrg, isPending: isOrgPending } = authClient.useActiveOrganization();
     const { data: session, isPending: isSessionPending } = authClient.useSession();
 
@@ -17,12 +17,12 @@ export function usePermissions() {
     }, [activeOrg, session]);
 
     // This is now a simple, synchronous function again
-    const hasPermission = React.useCallback((permission: string): boolean => {
+    const hasMemberPermission = React.useCallback((permission: string): boolean => {
         if (!currentUserMember?.role) return false;
 
         try {
-            const roleName = currentUserMember.role as keyof typeof customRoles;
-            const role = customRoles[roleName];
+            const roleName = currentUserMember.role as keyof typeof customMemberRoles;
+            const role = customMemberRoles[roleName];
 
             if (role) {
                 // Assuming authorize() is a synchronous method in your customRoles config
@@ -37,7 +37,7 @@ export function usePermissions() {
     }, [currentUserMember]);
 
     return {
-        hasPermission, // Works exactly like your old function!
+        hasMemberPermission, // Works exactly like your old function!
         activeOrg,
         role: currentUserMember?.role,
         isPending,

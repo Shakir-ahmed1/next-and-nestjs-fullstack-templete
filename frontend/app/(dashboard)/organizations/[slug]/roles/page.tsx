@@ -36,8 +36,8 @@ import {
     ChevronDown,
     Key,
 } from "lucide-react";
-import { PermissionGuard } from "@/components/auth/permission-guard";
-import { customStatements } from "@/lib/auth-permissions";
+import { MemberPermissionGuard } from "@/components/auth/member-permission-guard";
+import { customMemberStatements } from "@/lib/auth-member-permissions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useOrganization } from "@/hooks/use-organization";
@@ -262,7 +262,7 @@ export default function OrganizationRolesPage() {
                         Create and manage dynamic roles for your organization.
                     </p>
                 </div>
-                <PermissionGuard permission={{
+                <MemberPermissionGuard permission={{
                     ac: ["create"],
                 }}>
                     <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
@@ -297,7 +297,7 @@ export default function OrganizationRolesPage() {
                                     <div className="space-y-4">
                                         <Label>Permissions</Label>
                                         <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-h-[40vh] overflow-y-auto p-1">
-                                            {Object.entries(customStatements).map(([resource, actions]) => (
+                                            {Object.entries(customMemberStatements).map(([resource, actions]) => (
                                                 <PermissionSelectionCard key={resource} resource={resource} actions={actions} selectedPermissions={selectedPermissions} togglePermission={togglePermission} />
                                             ))}
                                         </div>
@@ -315,7 +315,7 @@ export default function OrganizationRolesPage() {
                             </form>
                         </DialogContent>
                     </Dialog>
-                </PermissionGuard>
+                </MemberPermissionGuard>
             </div>
 
             <div className="grid gap-4">
@@ -336,14 +336,14 @@ export default function OrganizationRolesPage() {
                                         </CardDescription>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <PermissionGuard permission={{ ac: ["update"] }}>
+                                        <MemberPermissionGuard permission={{ ac: ["update"] }}>
                                             <Button variant="ghost" size="sm" onClick={() => openEditDialog(role)}>
                                                 <Edit2 className="h-4 w-4 mr-1" />
                                                 Edit
                                             </Button>
-                                        </PermissionGuard>
+                                        </MemberPermissionGuard>
 
-                                        <PermissionGuard permission={{ ac: ["delete"] }}>
+                                        <MemberPermissionGuard permission={{ ac: ["delete"] }}>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -354,7 +354,7 @@ export default function OrganizationRolesPage() {
                                                 Delete
                                             </Button>
                                             <ConfirmDeletionDialog openDeleteDialog={isOpenDeleteDialog} setOpenDeleteDialog={setOpenDeleteDialog} isActionPending={isDeletionPending} onDelete={() => handleDeleteRole(role.id)} />
-                                        </PermissionGuard>
+                                        </MemberPermissionGuard>
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -430,7 +430,7 @@ export default function OrganizationRolesPage() {
                                 <div className="space-y-4">
                                     <Label>Permissions</Label>
                                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-h-[40vh] overflow-y-auto p-1">
-                                        {Object.entries(customStatements).map(([resource, actions]) => (
+                                        {Object.entries(customMemberStatements).map(([resource, actions]) => (
                                             <PermissionSelectionCard resource={resource} actions={actions} selectedPermissions={selectedPermissions} togglePermission={togglePermission} />
                                         ))}
                                     </div>

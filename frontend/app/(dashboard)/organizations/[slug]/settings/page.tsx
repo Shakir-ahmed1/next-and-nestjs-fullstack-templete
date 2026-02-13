@@ -22,7 +22,7 @@ import {
     Save,
     AlertTriangle,
 } from "lucide-react";
-import { PermissionGuard } from "@/components/auth/permission-guard";
+import { MemberPermissionGuard } from "@/components/auth/member-permission-guard";
 import { useOrganization } from "@/hooks/use-organization";
 
 export default function OrganizationSettingsPage() {
@@ -108,7 +108,7 @@ export default function OrganizationSettingsPage() {
 
     return (
         <div className="space-y-6 max-w-2xl">
-            <PermissionGuard permission={{
+            <MemberPermissionGuard permission={{
                 organization: ["update"],
             }}>
                 <Card>
@@ -154,8 +154,8 @@ export default function OrganizationSettingsPage() {
                         </CardFooter>
                     </form>
                 </Card>
-            </PermissionGuard>
-            <PermissionGuard permission={{
+            </MemberPermissionGuard>
+            <MemberPermissionGuard permission={{
                 organization: ["delete"],
             }}>
 
@@ -194,7 +194,7 @@ export default function OrganizationSettingsPage() {
                         </Button>
                     </CardFooter>
                 </Card>
-            </PermissionGuard>
+            </MemberPermissionGuard>
         </div>
     );
 }

@@ -16,7 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useUserProfile } from "@/hooks/use-profile";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useMemberPermissions } from "@/hooks/use-member-permissions";
 import {
   BarChart3,
   Home,
@@ -47,6 +47,7 @@ import {
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Fragment } from "react/jsx-runtime";
+import { canAccessAdminPage } from "@/lib/admin-helpers";
 
 const menuItems = [
   { title: "Organizations", icon: Building2, href: "/organizations" },
@@ -80,7 +81,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const { data: user, isLoading } = useUserProfile();
-  const { hasPermission } = usePermissions();
+  const { hasMemberPermission } = useMemberPermissions();
   const { state, toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed"
 
@@ -88,7 +89,7 @@ export function AppSidebar() {
 
   const filteredMenuItems = menuItems.filter(item => {
     if (!item.permission) return true;
-    return hasPermission(item.permission as any);
+    return hasMemberPermission(item.permission as any);
   });
 
   return (
@@ -140,7 +141,7 @@ export function AppSidebar() {
               {/* 3. THE EXPANDED TRIGGER (Standard shadcn position) */}
               {!isCollapsed && (
                 <Fragment >
-                <SidebarTrigger className="h-6 w-6" />
+                  <SidebarTrigger className="h-6 w-6" />
                 </Fragment>
               )}
 
@@ -168,7 +169,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {user?.role === "admin" && (
+        {canAccessAdminPage(user?.role) && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-lg font-semibold">
               Admin

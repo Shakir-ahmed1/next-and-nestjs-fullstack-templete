@@ -1,11 +1,8 @@
 "use client";
 
 import React from "react";
-import { usePermissions } from "@/hooks/use-permissions";
-import { customAC } from "@/lib/auth-permissions";
-import { permission } from "process";
-
-interface PermissionGuardProps {
+import { useMemberPermissions } from "@/hooks/use-member-permissions";
+interface MemberPermissionGuardProps {
     permission?: any;
     children: React.ReactNode;
     fallback?: React.ReactNode;
@@ -14,15 +11,15 @@ interface PermissionGuardProps {
 /**
  * Component to wrap parts of the UI that require specific permissions.
  */
-export function PermissionGuard({
+export function MemberPermissionGuard({
     children,
     permission,
     fallback = null,
-}: PermissionGuardProps) {
-    const { hasPermission, isPending } = usePermissions();
+}: MemberPermissionGuardProps) {
+    const { hasMemberPermission, isPending } = useMemberPermissions();
     if (isPending) return null;
 
-    if (!permission || hasPermission(permission)) {
+    if (!permission || hasMemberPermission(permission)) {
         return <>{children}</>;
     }
 

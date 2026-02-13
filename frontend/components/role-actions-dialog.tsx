@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogFooter, DialogHeader } from "./ui/dialog";
-import { PermissionGuard } from "./auth/permission-guard";
+import { MemberPermissionGuard } from "./auth/member-permission-guard";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -43,18 +43,18 @@ export const RoleActionsDialog = ({
     togglePermission,
     customStatements,
 }: Props) => {
-    
+
     return (
-        <PermissionGuard permission={details.permission}>
+        <MemberPermissionGuard permission={details.permission}>
             <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
                 setIsCreateDialogOpen(open);
                 if (!open) resetForm();
             }}>
                 <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create Role
-                        </Button>
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Role
+                    </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                     <form onSubmit={onSubmit}>
@@ -117,7 +117,7 @@ export const RoleActionsDialog = ({
                     </form>
                 </DialogContent>
             </Dialog>
-        </PermissionGuard>
+        </MemberPermissionGuard>
 
     )
 }

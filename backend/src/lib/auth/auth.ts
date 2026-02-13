@@ -1,13 +1,15 @@
 
-import { betterAuth, Path } from "better-auth";
+import { APIError, betterAuth, Path } from "better-auth";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
 import { openAPI, admin, organization, createAccessControl } from "better-auth/plugins";
 import { COOKIE_PREFIX } from "./auth.config";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../utils/send-email";
-import { customAC, customRoles } from "./auth-permissions";
+import { customMemberAC, customMemberRoles } from "./auth-member-permissions";
 import { typeormAdapter } from "./typeorm-adapter-auth";
+import { customUserAc, customUserRoles } from "./auth-user-permissions";
+import { databaseHooks } from "./auth-hooks";
 
 const logger = new Logger('BetterAuth');
 
@@ -21,6 +23,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         database: typeormAdapter(dataSource, {
             softDeleteEnabledEntities: ['user', 'member', 'organization'],
         }),
+        databaseHooks,
         emailAndPassword: {
             enabled: true,
             sendResetPassword: sendResetPasswordEmail,
@@ -50,10 +53,14 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
         },
         plugins: [
             openAPI(),
-            admin(),
+            admin({
+                ac: customUserAc,
+                roles: customUserRoles,
+                adminRole: ["admin", "owner", "super_owner"],
+            }),
             organization({
-                ac: customAC,
-                roles: customRoles,
+                ac: customMemberAC,
+                roles: customMemberRoles,
                 dynamicAccessControl: {
                     enabled: true,
                 },
@@ -62,7 +69,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
                 // Creating an organization creator role by default
                 creatorRole: "owner",
                 allowUserToCreateOrganization: async (user) => {
-                    return user.role === 'admin'
+                    return ["admin", "owner", "super_owner"].includes(user.role)
                 },
 
             }),

@@ -48,7 +48,7 @@ import {
 import { organizationRoles } from "../../roles";
 import { InvitationStatus } from "better-auth/plugins";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PermissionGuard } from "@/components/auth/permission-guard";
+import { MemberPermissionGuard } from "@/components/auth/member-permission-guard";
 import { useCurrentActiveOrgMember, useOrganization } from "@/hooks/use-organization";
 const invitationStatusColor: Record<InvitationStatus, string> = {
     pending: "bg-secondary text-secondary-foreground ring-border",
@@ -224,7 +224,7 @@ export default function OrganizationMembersPage() {
                         Manage members and their roles within the organization.
                     </p>
                 </div>
-                <PermissionGuard permission={{
+                <MemberPermissionGuard permission={{
                     invitation: ["create"],
                 }}>
                     <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
@@ -271,7 +271,7 @@ export default function OrganizationMembersPage() {
                             </form>
                         </DialogContent>
                     </Dialog>
-                </PermissionGuard>
+                </MemberPermissionGuard>
             </div>
 
             <Card>
@@ -295,7 +295,7 @@ export default function OrganizationMembersPage() {
                                         <p className="text-xs text-muted-foreground">{member.user.email}</p>
                                     </div>
                                 </div>
-                                <PermissionGuard permission={{
+                                <MemberPermissionGuard permission={{
                                     members: ["update", "delete"],
                                 }}>
                                     <div className="flex items-center gap-4">
@@ -314,7 +314,7 @@ export default function OrganizationMembersPage() {
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
-                                </PermissionGuard>
+                                </MemberPermissionGuard>
                             </div>
                         ))}
                         {(!organization?.members || organization.members.length === 0) && (
@@ -327,7 +327,7 @@ export default function OrganizationMembersPage() {
             </Card>
 
             {organization?.invitations && organization.invitations.length > 0 && (
-                <PermissionGuard permission={{
+                <MemberPermissionGuard permission={{
                     invitation: ["create", "cancel"],
                 }}>
                     <Card>
@@ -383,7 +383,7 @@ export default function OrganizationMembersPage() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset ${invitationStatusColor[invite.status]}`}>{invite.status}</span>
-                                                <PermissionGuard permission={{
+                                                <MemberPermissionGuard permission={{
                                                     invitation: ["cancel"],
                                                 }}>
                                                     <Button
@@ -394,14 +394,14 @@ export default function OrganizationMembersPage() {
                                                     >
                                                         Cancel
                                                     </Button>
-                                                </PermissionGuard>
+                                                </MemberPermissionGuard>
                                             </div>
                                         </div>
                                     ))}
                             </div>
                         </CardContent>
                     </Card>
-                </PermissionGuard>
+                </MemberPermissionGuard>
             )}
         </div>
     );

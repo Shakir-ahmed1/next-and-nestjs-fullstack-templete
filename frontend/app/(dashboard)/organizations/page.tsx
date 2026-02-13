@@ -32,21 +32,15 @@ import {
     Building2,
     Plus,
     Users,
-    Settings,
     Loader2,
-    Shield,
-    LogOut,
     ArrowRight,
-    Mail
+
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useUserProfile } from "@/hooks/use-profile";
-import AdminUsersOnly from "@/components/access-control/admin-users-only";
-import { redirect } from "next/navigation";
 import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
 import { useUserMemberships } from "@/hooks/use-memberships";
 import { ListInvitations } from "@/components/list-invitations";
+import { UserPermissionGuard } from "@/components/auth/user-permission-guard";
 
 export default function UserOrganizationsPage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -54,7 +48,9 @@ export default function UserOrganizationsPage() {
     const [newOrgSlug, setNewOrgSlug] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [slugAlreadyExist, setSlugAlreadyExist] = useState(false);
-    const { activeOrg, handleSetActiveOrg } = useContext(ActiveOrganizationContext)
+    const { handleSetActiveOrg } = useContext(ActiveOrganizationContext)
+    const session = authClient.useSession();
+    const currentUser = session.data?.user ?? null;
 
     const { data: memberships, isPending, error, refetch: refetchMemberships } = useUserMemberships()
 
@@ -119,76 +115,79 @@ export default function UserOrganizationsPage() {
                     </p>
                 </div>
 
-                <AdminUsersOnly><Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="w-full md:w-auto">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create Organization
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <form onSubmit={handleCreateOrganization}>
-                            <DialogHeader>
-                                <DialogTitle>Create Organization</DialogTitle>
-                                <DialogDescription>
-                                    Create a new organization to manage your team and projects.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Organization Name</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="Acme Inc."
-                                        value={newOrgName}
-                                        onChange={(e) => {
-                                            setNewOrgName(e.target.value);
-                                            // Simple slug generation
-                                            if (!newOrgSlug || newOrgSlug === newOrgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')) {
-                                                const generatedSlug = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                                                handleSlugChecking(generatedSlug);
-                                                setNewOrgSlug(generatedSlug);
-                                            }
+                <UserPermissionGuard permissions={{
+                    organization: ['create']
+                }}>
+                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="w-full md:w-auto">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Organization
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <form onSubmit={handleCreateOrganization}>
+                                <DialogHeader>
+                                    <DialogTitle>Create Organization</DialogTitle>
+                                    <DialogDescription>
+                                        Create a new organization to manage your team and projects.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="name">Organization Name</Label>
+                                        <Input
+                                            id="name"
+                                            placeholder="Acme Inc."
+                                            value={newOrgName}
+                                            onChange={(e) => {
+                                                setNewOrgName(e.target.value);
+                                                // Simple slug generation
+                                                if (!newOrgSlug || newOrgSlug === newOrgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')) {
+                                                    const generatedSlug = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                                                    handleSlugChecking(generatedSlug);
+                                                    setNewOrgSlug(generatedSlug);
+                                                }
 
-                                        }}
-                                        required
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="slug">Slug</Label>
-                                    <Input
-                                        id="slug"
-                                        placeholder="acme-inc"
-                                        value={newOrgSlug}
-                                        onChange={async (e) => {
-                                            handleSlugChecking(e.target.value);
-                                            setNewOrgSlug(e.target.value)
-                                        }}
-                                        required
-                                    />
-                                    {slugAlreadyExist && (
-                                        <p className="text-xs text-red-500">
-                                            Slug already exists
+                                            }}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="slug">Slug</Label>
+                                        <Input
+                                            id="slug"
+                                            placeholder="acme-inc"
+                                            value={newOrgSlug}
+                                            onChange={async (e) => {
+                                                handleSlugChecking(e.target.value);
+                                                setNewOrgSlug(e.target.value)
+                                            }}
+                                            required
+                                        />
+                                        {slugAlreadyExist && (
+                                            <p className="text-xs text-red-500">
+                                                Slug already exists
+                                            </p>
+                                        )}
+                                        <p className="text-xs text-muted-foreground">
+                                            This will be used in your organization's URL.
                                         </p>
-                                    )}
-                                    <p className="text-xs text-muted-foreground">
-                                        This will be used in your organization's URL.
-                                    </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isCreating || slugAlreadyExist}>
-                                    {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Create
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-                </AdminUsersOnly>
+                                <DialogFooter>
+                                    <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={isCreating || slugAlreadyExist}>
+                                        {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Create
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </UserPermissionGuard>
             </div>
 
             <ListInvitations onAcceptInvitation={() => refetchMemberships()} />
