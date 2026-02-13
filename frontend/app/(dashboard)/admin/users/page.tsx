@@ -39,6 +39,7 @@ import {
     ArrowDown,
     ChevronLeft,
     ChevronRight,
+    Plus,
     KeyRound,
     Key
 } from "lucide-react";
@@ -62,6 +63,12 @@ export default function AdminUsersPage() {
         data?: any;
     } | null>(null);
     const [isActionPending, setIsActionPending] = useState(false);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [newFirstName, setNewFirstName] = useState("");
+    const [newLastName, setNewLastName] = useState("");
+    const [newUserEmail, setNewUserEmail] = useState("");
+    const [newUserPassword, setNewUserPassword] = useState("");
+    const [isCreatingUser, setIsCreatingUser] = useState(false);
     const session = authClient.useSession();
     const currentUser = session.data?.user;
     const currentUserRole = currentUser?.role as keyof typeof rolePower || "user";
@@ -104,6 +111,34 @@ export default function AdminUsersPage() {
         } else {
             setSortBy(field);
             setSortDirection("asc");
+        }
+    };
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsCreatingUser(true);
+        try {
+            const res = await authClient.admin.createUser({
+                email: newUserEmail,
+                password: newUserPassword,
+                name: `${newFirstName} ${newLastName}`,
+            });
+
+            if (res.error) {
+                toast.error(res.error.message || "Failed to create user");
+            } else {
+                toast.success("User created successfully");
+                setIsCreateDialogOpen(false);
+                setNewFirstName("");
+                setNewLastName("");
+                setNewUserEmail("");
+                setNewUserPassword("");
+                refetch();
+            }
+        } catch (err: any) {
+            toast.error(err.message || "An unexpected error occurred");
+        } finally {
+            setIsCreatingUser(false);
         }
     };
 
@@ -275,6 +310,10 @@ export default function AdminUsersPage() {
                             ))}
                         </select>
                     </div>
+                    <Button onClick={() => setIsCreateDialogOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create User
+                    </Button>
                 </div>
             </div>
 
@@ -505,6 +544,88 @@ export default function AdminUsersPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogContent>
+                    <form onSubmit={handleCreateUser}>
+                        <DialogHeader>
+                            <DialogTitle>Create New User</DialogTitle>
+                            <DialogDescription>
+                                Add a new user to the system. They will be able to sign in with these credentials.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="first-name">First name</Label>
+                                <Input
+                                    id="first-name"
+                                    placeholder="Enter first name"
+                                    required
+                                    autoComplete="off"
+                                    onChange={(e) => {
+                                        setNewFirstName(e.target.value);
+                                    }}
+                                    value={newFirstName}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last-name">Last name</Label>
+                                <Input
+                                    id="last-name"
+                                    placeholder="Enter last name"
+                                    required
+                                    autoComplete="off"
+
+                                    onChange={(e) => {
+                                        setNewLastName(e.target.value);
+                                    }}
+                                    value={newLastName}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email Address</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="user@example.com"
+                                    autoComplete="off"
+                                    value={newUserEmail}
+                                    onChange={(e) => setNewUserEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    autoComplete="new-password"
+
+                                    value={newUserPassword}
+                                    onChange={(e) => setNewUserPassword(e.target.value)}
+                                    required
+                                    minLength={8}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsCreateDialogOpen(false)}
+                                disabled={isCreatingUser}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isCreatingUser}>
+                                {isCreatingUser && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Create User
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={actionToConfirm !== null} onOpenChange={(open) => !open && setActionToConfirm(null)}>
                 <DialogContent>
