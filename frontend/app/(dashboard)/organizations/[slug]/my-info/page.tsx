@@ -8,12 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { authClient } from "@/lib/auth-client";
-import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
-import { useContext } from "react";
+import { useActiveOrganizationContext } from "@/hooks/contexts/active-organization";
 
 export default function LeaveOrganizationPage() {
   const router = useRouter();
-  const { activeOrg } = useContext(ActiveOrganizationContext)
+  const { activeOrg } = useActiveOrganizationContext()
 
   const [confirmed, setConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);

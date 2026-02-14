@@ -26,7 +26,7 @@ import {
     AvatarFallback,
     AvatarImage
 } from "@/components/ui/avatar";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
     Building2,
@@ -37,7 +37,7 @@ import {
 
 } from "lucide-react";
 import Link from "next/link";
-import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
+import ActiveOrganizationContext, { useActiveOrganizationContext } from "@/hooks/contexts/active-organization";
 import { useUserMemberships } from "@/hooks/use-memberships";
 import { ListInvitations } from "@/components/list-invitations";
 import { UserPermissionGuard } from "@/components/auth/user-permission-guard";
@@ -48,7 +48,7 @@ export default function UserOrganizationsPage() {
     const [newOrgSlug, setNewOrgSlug] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [slugAlreadyExist, setSlugAlreadyExist] = useState(false);
-    const { handleSetActiveOrg } = useContext(ActiveOrganizationContext)
+    const { handleSetActiveOrg } = useActiveOrganizationContext()
     const session = authClient.useSession();
     const currentUser = session.data?.user ?? null;
 

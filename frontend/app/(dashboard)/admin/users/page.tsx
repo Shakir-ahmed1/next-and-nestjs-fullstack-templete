@@ -203,7 +203,7 @@ export default function AdminUsersPage() {
         }
     };
 
-    const handleSetRole = async (userId: string, currentRole: string, newRole: string, skipConfirm = false) => {
+    const handleSetRole = async (userId: string, currentRole: string, newRole: "user" | "admin" | "super_owner" | "owner", skipConfirm = false) => {
 
         if (!confirmDisabled && !skipConfirm) {
             const user = users.find(u => u.id === userId);
@@ -445,7 +445,7 @@ export default function AdminUsersPage() {
                                                                                 variant="outline"
                                                                                 size="icon"
                                                                                 title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
-                                                                                onClick={() => handleSetRole(user.id, user.role, user.role === "admin" ? "user" : "admin")}
+                                                                                onClick={() => handleSetRole(user.id, user.role as string, user.role === "admin" ? "user" : "admin")}
                                                                             >
                                                                                 {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
                                                                             </Button>

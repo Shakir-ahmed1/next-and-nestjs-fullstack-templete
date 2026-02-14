@@ -10,4 +10,6 @@ const ActiveOrganizationContext = React.createContext<ActiveOrganizationContextV
     handleSetActiveOrg: () => Promise.resolve(),
     activeOrg: null,
 });
+
+export const useActiveOrganizationContext = () => React.useContext(ActiveOrganizationContext);
 export default ActiveOrganizationContext

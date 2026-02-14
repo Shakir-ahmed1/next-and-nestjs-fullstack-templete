@@ -5,20 +5,20 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Moon, Sun, Bell, Search, Building2, ChevronsUpDown, Plus } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import ActiveOrganizationContext from "@/hooks/contexts/active-organization"
+import ActiveOrganizationContext, { useActiveOrganizationContext } from "@/hooks/contexts/active-organization"
 
 
 export function DashboardHeader() {
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const { data: organizations } = authClient.useListOrganizations();
-  const { activeOrg, handleSetActiveOrg } = useContext(ActiveOrganizationContext)
+  const { activeOrg, handleSetActiveOrg } = useActiveOrganizationContext()
   // Avoid hydration mismatch
   useEffect(() => setMounted(true), [])
 

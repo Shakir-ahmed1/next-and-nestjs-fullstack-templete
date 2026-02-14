@@ -86,7 +86,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed"
 
 
-
+  if (!user) return;
   const filteredMenuItems = menuItems.filter(item => {
     if (!item.permission) return true;
     return hasMemberPermission(item.permission as any);
