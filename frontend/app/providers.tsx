@@ -13,8 +13,8 @@ import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
 import ActiveOrganizationContext from "@/hooks/contexts/active-organization";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+
+function InnerProviders({ children }: { children: React.ReactNode }) {
   const { data: activeOrg, refetch } = authClient.useActiveOrganization();
   const handleSetActiveOrg = async (orgSlug: string) => {
     await authClient.organization.setActive({
@@ -25,6 +25,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   };
 
   return (
+    <ActiveOrganizationContext.Provider value={{ handleSetActiveOrg, activeOrg }}>
+      {children}
+    </ActiveOrganizationContext.Provider>
+  );
+}
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
         attribute="class"
@@ -33,10 +43,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <Toaster />
-        <ActiveOrganizationContext.Provider value={{ handleSetActiveOrg, activeOrg }}>  
-        {children}
-
-        </ActiveOrganizationContext.Provider>
+        <InnerProviders>
+          {children}
+        </InnerProviders>
         {NEXT_PUBLIC_NODE_ENV === 'development' &&
           <>
             <ReactQueryDevtools initialIsOpen={false} />

@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Code2, RefreshCw, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";

@@ -11,7 +11,13 @@ import { companyInfo } from "@/config";
 //   subsets: ["latin"],
 // });
 
+
 export const dynamic = 'force-dynamic';
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: companyInfo.name,
@@ -29,12 +35,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      {/* <body
-        className={`${geistSans.className} antialiased`}
-      > */}
-      <body
-      // className={`antialiased`}
-      >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
