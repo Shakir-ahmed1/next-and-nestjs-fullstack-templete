@@ -1,5 +1,5 @@
-import { Controller, Get, Delete, Param, UnauthorizedException, ForbiddenException } from '@nestjs/common';
-import { Session } from '@thallesp/nestjs-better-auth';
+import { Controller, Get, Delete, Param, InternalServerErrorException } from '@nestjs/common';
+import { Roles, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { OrganizationsService } from './organizations.service';
 
@@ -8,21 +8,19 @@ export class OrganizationsAdminController {
     constructor(private orgService: OrganizationsService) { }
 
     @Get()
+    @Roles(['admin', 'owner'])
     async getAll(@Session() session: UserSession) {
-        if (!session) throw new UnauthorizedException();
-        // Check if user is a system admin
-        if (session.user.role !== 'admin') {
-            throw new ForbiddenException('Only system admins can access this resource');
-        }
         return this.orgService.findAll();
     }
 
     @Delete(':id')
+    @Roles(['admin', 'owner'])
     async delete(@Session() session: UserSession, @Param('id') id: string) {
-        if (!session) throw new UnauthorizedException();
-        if (session.user.role !== 'admin') {
-            throw new ForbiddenException('Only system admins can perform this action');
-        }
         return this.orgService.delete(id);
+    }
+    @Put(':id')
+    @Roles(['admin', 'owner'])
+    async updateOrg(@Session() session: UserSession, @Param('id') id: string) {
+        throw new InternalServerErrorException("Methode not implemented")
     }
 }

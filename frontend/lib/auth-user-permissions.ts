@@ -1,4 +1,4 @@
-import { createAccessControl } from "better-auth/plugins";
+import { createAccessControl, organization } from "better-auth/plugins";
 import { adminAc, defaultStatements, userAc } from "better-auth/plugins/admin/access";
 
 /**
@@ -15,7 +15,7 @@ const customUserStatements = {
     // requests: ["create", "read", "update"],
     admin_users: ["create", "update", "delete"],
     owner_users: ["create", "update", "delete"],
-    organization: ["create", "update", "delete"],
+    organization: ["list", "create", "update", "delete"],
 }
 
 const statement = {

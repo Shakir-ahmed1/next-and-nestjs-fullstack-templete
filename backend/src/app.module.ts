@@ -8,14 +8,12 @@ import { User } from './lib/users/entities/user.entity';
 import { Account } from './lib/auth/entities/account.entity';
 import { Session } from './lib/auth/entities/session.entity';
 import { Verification } from './lib/auth/entities/verification.entity';
-import { UploadImage } from './lib/media/uploads/entities/upload-image.entity';
 import { Organization } from './lib/auth/entities/organization.entity';
 import { Member } from './lib/auth/entities/member.entity';
 import { Invitation } from './lib/auth/entities/invitation.entity';
 import { OrganizationRole } from './lib/auth/entities/organization-role.entity';
 import { MediaModule } from './lib/media/media.module';
 import { TodoModule } from './todo/todo.module';
-import { Todo } from './todo/entities/todo.entity';
 import { OrganizationsModule } from './lib/organizations/organizations.module';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { getBetterAuthConfig } from './lib/auth/auth';
@@ -86,7 +84,7 @@ import { AuthLoggingInterceptor } from './common/interceptors/auth-logging.inter
       }),
       inject: [ConfigService],
     }),
-    AuthModule.forRootAsync({
+    AuthModule.forRootAsync({ 
       isGlobal: true,
       imports: [TypeOrmModule.forFeature([User, Account, Session, Verification, Organization, Member, Invitation, OrganizationRole])],
       inject: [ConfigService, DataSource],

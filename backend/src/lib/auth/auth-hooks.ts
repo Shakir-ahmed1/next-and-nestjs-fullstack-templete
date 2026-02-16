@@ -1,4 +1,4 @@
-import { APIError, GenericEndpointContext, User } from "better-auth"; // Adjust import based on your setup
+import { APIError, BetterAuthOptions, GenericEndpointContext, User } from "better-auth"; // Adjust import based on your setup
 
 // 1. Define the role hierarchy using a numeric rank
 const ROLE_RANKS: Record<string, number> = {
@@ -27,74 +27,78 @@ function isActionAllowed(actorRole: string, targetRole: string, newRole?: string
     return actorRank > targetRank;
 }
 
-export const databaseHooks = {
+export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
     user: {
         delete: {
             before: async (user: User & Record<string, unknown>, ctx: GenericEndpointContext | null) => {
-                const { userId: targetUserId } = ctx?.body as { userId: string, role: string };
-                const { id: actorUserId } = ctx?.context?.session?.user as { id: string };
-                if (!targetUserId || !actorUserId) return;
-                // Get the role of the user performing the action (the "actor")
-                // Note: Adjust the path below if your session is stored differently in the ctx
-                if (targetUserId) {
-                    const actorUser: any = await ctx?.context.adapter.findOne({
-                        model: 'user',
-                        where: [{ field: 'id', operator: 'eq', value: actorUserId as string }]
-                    });
-                    const actorRole = actorUser?.role || "user";
-
-                    // Fetch the target user being deleted
-                    const targetUser: any = await ctx?.context.adapter.findOne({
-                        model: 'user',
-                        where: [{ field: 'id', operator: 'eq', value: targetUserId as string }]
-                    });
-
-                    const targetRole = targetUser?.role || "user";
-
-                    // Check if the actor has permission to delete the target
-                    if (!isActionAllowed(actorRole, targetRole)) {
-                        throw new APIError("BAD_REQUEST", {
-                            message: `Permission denied: A '${actorRole}' cannot delete a '${targetRole}'.`,
+                if (ctx?.path?.includes("admin")) {
+                    const { userId: targetUserId } = ctx?.body as { userId: string, role: string };
+                    const { id: actorUserId } = ctx?.context?.session?.user as { id: string };
+                    if (!targetUserId || !actorUserId) return;
+                    // Get the role of the user performing the action (the "actor")
+                    // Note: Adjust the path below if your session is stored differently in the ctx
+                    if (targetUserId) {
+                        const actorUser: any = await ctx?.context.adapter.findOne({
+                            model: 'user',
+                            where: [{ field: 'id', operator: 'eq', value: actorUserId as string }]
                         });
-                    }
+                        const actorRole = actorUser?.role || "user";
 
-                    return true;
+                        // Fetch the target user being deleted
+                        const targetUser: any = await ctx?.context.adapter.findOne({
+                            model: 'user',
+                            where: [{ field: 'id', operator: 'eq', value: targetUserId as string }]
+                        });
+
+                        const targetRole = targetUser?.role || "user";
+
+                        // Check if the actor has permission to delete the target
+                        if (!isActionAllowed(actorRole, targetRole)) {
+                            throw new APIError("BAD_REQUEST", {
+                                message: `Permission denied: A '${actorRole}' cannot delete a '${targetRole}'.`,
+                            });
+                        }
+
+                        return true;
+                    }
                 }
             },
         },
         update: {
             before: async (user: User & Record<string, unknown>, ctx: GenericEndpointContext | null) => {
-                const { userId: targetUserId, role: newRole } = ctx?.body as { userId: string, role: string };
-                const { id: actorUserId } = ctx?.context?.session?.user as { id: string };
+                if (ctx?.path?.includes("admin")) {
+                    const { userId: targetUserId, role: newRole } = ctx?.body as { userId: string, role: string };
+                    const { id: actorUserId } = ctx?.context?.session?.user as { id: string };
 
-                if (!targetUserId || !actorUserId) return;
-                // Get the role of the user performing the action (the "actor")
-                // Note: Adjust the path below if your session is stored differently in the ctx
-                if (targetUserId) {
-                    const actorUser: any = await ctx?.context.adapter.findOne({
-                        model: 'user',
-                        where: [{ field: 'id', operator: 'eq', value: actorUserId as string }]
-                    });
-                    const actorRole = actorUser?.role || "user";
-
-                    // Fetch the target user being updated
-                    const targetUser: any = await ctx?.context.adapter.findOne({
-                        model: 'user',
-                        where: [{ field: 'id', operator: 'eq', value: targetUserId as string }]
-                    });
-
-                    const targetRole = targetUser?.role || "user";
-                    console.log("actorUser", actorUser);
-                    console.log("targetUser", targetUser);
-                    console.log(actorRole, targetRole, newRole);
-                    // Check if the actor has permission to update the target
-                    if (!isActionAllowed(actorRole, targetRole, newRole)) {
-                        throw new APIError("BAD_REQUEST", {
-                            message: `Permission denied: A '${actorRole}' cannot update a '${targetRole}'.`,
+                    if (!targetUserId || !actorUserId) return;
+                    // Get the role of the user performing the action (the "actor")
+                    // Note: Adjust the path below if your session is stored differently in the ctx
+                    if (targetUserId) {
+                        const actorUser: any = await ctx?.context.adapter.findOne({
+                            model: 'user',
+                            where: [{ field: 'id', operator: 'eq', value: actorUserId as string }]
                         });
-                    }
+                        const actorRole = actorUser?.role || "user";
 
-                    return true;
+                        // Fetch the target user being updated
+                        const targetUser: any = await ctx?.context.adapter.findOne({
+                            model: 'user',
+                            where: [{ field: 'id', operator: 'eq', value: targetUserId as string }]
+                        });
+
+                        const targetRole = targetUser?.role || "user";
+                        console.log("actorUser", actorUser);
+                        console.log("targetUser", targetUser);
+                        console.log(actorRole, targetRole, newRole);
+                        // Check if the actor has permission to update the target
+                        if (!isActionAllowed(actorRole, targetRole, newRole)) {
+                            throw new APIError("BAD_REQUEST", {
+                                message: `Permission denied: A '${actorRole}' cannot update a '${targetRole}'.`,
+                            });
+                        }
+
+                        return true;
+                    }
                 }
             },
         },

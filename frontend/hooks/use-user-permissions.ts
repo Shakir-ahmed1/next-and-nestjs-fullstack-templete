@@ -16,7 +16,7 @@ export function useUserPermissions() {
     };
 
     // This is now a simple, synchronous function again
-    const hasUserPermission = (permission: string): boolean => {
+    const hasUserPermission = (permission: any): boolean => {
         if (!currentUser.role) return false;
 
         try {

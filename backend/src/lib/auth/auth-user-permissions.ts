@@ -15,7 +15,7 @@ const customUserStatements = {
     // requests: ["create", "read", "update"],
     admin_users: ["create", "update", "delete"],
     owner_users: ["create", "update", "delete"],
-    organization: ["create", "update", "delete"],
+    organization: ["list", "create", "update", "delete"],
 }
 
 const statement = {
@@ -48,14 +48,14 @@ const ownerRole = customUserAc.newRole({
     ...customUserStatements,
     ...adminAc.statements,
     admin_users: ["create", "update", "delete"],
-    organization: ["create", "update", "delete"],
+    organization: ["create", "update", "delete", "list"],
 })
 const superOwnerRole = customUserAc.newRole({
     ...customUserStatements,
     ...adminAc.statements,
     admin_users: ["create", "update", "delete"],
     owner_users: ["create", "update", "delete"],
-    organization: ["create", "update", "delete"],
+    organization: ["create", "update", "delete", "list"],
 })
 export const customUserRoles = {
     super_owner: superOwnerRole,

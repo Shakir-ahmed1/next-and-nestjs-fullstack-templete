@@ -3,7 +3,7 @@ import { APIError, betterAuth, Path } from "better-auth";
 import { DataSource } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
-import { openAPI, admin, organization, createAccessControl } from "better-auth/plugins";
+import { openAPI, admin, organization } from "better-auth/plugins";
 import { COOKIE_PREFIX } from "./auth.config";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../utils/send-email";
 import { customMemberAC, customMemberRoles } from "./auth-member-permissions";
