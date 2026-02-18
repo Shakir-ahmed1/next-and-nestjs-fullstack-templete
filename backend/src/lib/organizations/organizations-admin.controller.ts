@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Param, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Delete, Param, InternalServerErrorException, Put } from '@nestjs/common';
 import { Roles, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { OrganizationsService } from './organizations.service';
