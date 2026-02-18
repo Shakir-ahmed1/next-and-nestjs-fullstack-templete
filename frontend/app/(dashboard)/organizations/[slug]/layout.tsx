@@ -97,23 +97,26 @@ export default function OrganizationLayout({ children }: { children: React.React
                     </div>
                 </div> */}
 
-                <nav className="flex space-x-2">
+                <nav className="flex space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar pb-1">
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const isActive = pathname === item.href || (item.title === "Overview" && pathname === `/organizations/${slug}`);
                         return (
                             <MemberPermissionGuard permission={item.permissions} key={item.href}>
                                 <Link
-
                                     href={item.href}
                                     className={cn(
-                                        "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        "inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 sm:px-3 sm:py-2 text-sm font-medium transition-colors whitespace-nowrap",
                                         isActive
-                                            ? "bg-primary text-primary-foreground"
+                                            ? "bg-primary text-primary-foreground shadow-sm"
                                             : "hover:bg-muted text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     <item.icon className="h-4 w-4" />
-                                    {item.title}
+                                    <span className={cn(
+                                        isActive ? "inline" : "hidden md:inline"
+                                    )}>
+                                        {item.title}
+                                    </span>
                                 </Link>
                             </MemberPermissionGuard>
                         );

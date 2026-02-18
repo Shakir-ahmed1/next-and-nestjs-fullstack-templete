@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 // import { Geist } from "next/font/google";
 import "./globals.css";
 import Providers from './providers';
-import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
 import { companyInfo } from "@/config";
 
 // const geistSans = Geist({

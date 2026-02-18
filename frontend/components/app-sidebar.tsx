@@ -26,10 +26,10 @@ import {
   Settings,
   ShoppingCart,
   Users,
-  Building2,
   ChevronsUpDown,
   Plus,
   PanelLeft,
+  Building2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -79,6 +79,29 @@ const menuItems = [
   },
   { title: "Settings", icon: Settings, href: "/dashboard/settings" },
 ];
+const adminMenuItems = [{
+  title: 'Admin Dashboard',
+  icon: LayoutDashboard,
+  href: '/admin',
+  // permission: {}
+},
+{
+  title: 'Manage Users',
+  icon: Users,
+  href: '/admin/users',
+  // permission: {
+  //   users: ['read', 'write', 'delete']
+  // }
+},
+{
+  title: 'Manage Organizations',
+  icon: Building2,
+  href: '/admin/organizations',
+  // permission: {
+  //   organization: ['read', 'write', 'delete']
+  // }
+},
+]
 
 export function AppSidebar() {
   const { data: user, isLoading } = useUserProfile();
@@ -88,7 +111,19 @@ export function AppSidebar() {
 
 
   if (!user) return;
+
+  const handleMobileNavClick = () => {
+    if (isMobile && state === "expanded") {
+      toggleSidebar();
+    }
+  };
+
   const filteredMenuItems = menuItems.filter(item => {
+    if (!item.permission) return true;
+    return hasMemberPermission(item.permission as any);
+  });
+
+  const filteredAdminMenuItems = adminMenuItems.filter(item => {
     if (!item.permission) return true;
     return hasMemberPermission(item.permission as any);
   });
@@ -100,15 +135,15 @@ export function AppSidebar() {
           <SidebarMenuItem className="list-none">
             <div className={`group relative flex h-12 items-center px-2 ${isCollapsed && !isMobile ? "justify-center" : "justify-between"}`}>
               {/* <div className="flex items-center gap-2"> */}
-                <Link
-                  href="/"
-                  className={`flex items-center gap-2 ${isCollapsed && !isMobile ? "flex" : "flex"}`}
-                >
-                  <Image src={companyInfo.logo} alt="Logo" width={24} height={24} className="shrink-0" />
-                  {(state === "expanded" || isMobile) && (
-                    <span className="font-semibold whitespace-nowrap">{companyInfo.name}</span>
-                  )}
-                </Link>
+              <Link
+                href="/"
+                className={`flex items-center gap-2 ${isCollapsed && !isMobile ? "flex" : "flex"}`}
+              >
+                <Image src={companyInfo.logo} alt="Logo" width={24} height={24} className="shrink-0" />
+                {(state === "expanded" || isMobile) && (
+                  <span className="font-semibold whitespace-nowrap">{companyInfo.name}</span>
+                )}
+              </Link>
               {/* </div> */}
 
               {/* Toggle Trigger - Show simplified on mobile or when expanded on desktop */}
@@ -138,7 +173,7 @@ export function AppSidebar() {
               {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleMobileNavClick}>
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>
@@ -156,31 +191,16 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/admin">
-                      <LayoutDashboard className="h-5 w-5" />
-                      <span>Admin Dashboard</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/admin/users">
-                      <Users className="h-5 w-5" />
-                      <span>Manage Users</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/admin/organizations">
-                      <Building2 className="h-5 w-5" />
-                      <span>Manage Organizations</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+                {filteredAdminMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.href} onClick={handleMobileNavClick}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
