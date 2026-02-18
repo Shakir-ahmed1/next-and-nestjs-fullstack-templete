@@ -24,7 +24,7 @@ import {
     AvatarFallback,
     AvatarImage
 } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import {
     Shield,
@@ -45,8 +45,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
-import { rolePower, UserPermissionGuard } from "@/components/auth/user-permission-guard";
+import { rolePower } from "@/components/auth/user-permission-guard";
 
 export default function AdminUsersPage() {
     const [limit, setLimit] = useState(10);
@@ -101,9 +100,62 @@ export default function AdminUsersPage() {
         placeholderData: (previousData) => previousData,
     });
 
+    // Pre-computing user filtering and permissions
+    const { processedUsers, currentVisibleCount, totalHiddenInBatch } = useMemo(() => {
+        if (!usersData?.users || !currentUser) {
+            return { processedUsers: [], currentVisibleCount: 0, totalHiddenInBatch: 0 };
+        }
+        // filter out users that the current user cannot see
+        const filtered = usersData.users.filter((user) => {
+            if (user.id === currentUser.id) return true;
+            const targetRole = user.role as keyof typeof rolePower || "user";
+            const targetPower = rolePower[targetRole] ?? 0;
+
+            // Visibility Logic:
+            // user, admin (0, 1) -> seen by admin+ (power >= 1)
+            // owner, super_owner (2, 3) -> seen by super_owner (power >= 3)
+            if (targetPower <= 1) return currentPower >= 1;
+            if (targetPower >= 2) return currentPower >= 3;
+            return false;
+        });
+
+        const mapped = filtered.map((user) => {
+            const targetRole = user.role as keyof typeof rolePower || "user";
+            const roleValue = rolePower[targetRole] ?? 0;
+
+            // Action Logic:
+            // super_owner can be acted on by none
+            const isSuperOwner = user.role === 'super_owner';
+            // target can be acted on by someone with strictly higher power
+            const canManage = !isSuperOwner && currentPower >= roleValue + 1;
+
+            return {
+                ...user,
+                permissions: {
+                    canBan: canManage,
+                    canDelete: canManage,
+                    canChangeGeneralRole: canManage,
+                    canPromoteToOwner: currentUserRole === 'super_owner' && (user.role === 'owner' || user.role === 'admin'),
+                    canPromoteToAdmin: canManage && user.role !== "admin",
+                }
+            };
+        });
+
+        return {
+            processedUsers: mapped,
+            currentVisibleCount: filtered.length,
+            totalHiddenInBatch: usersData.users.length - filtered.length
+        };
+    }, [usersData?.users, currentUser, currentPower, currentUserRole]);
+
+    const users = processedUsers;
+
     const totalUsers = usersData?.total || 0;
+    // Adjusted total to fix the conflict on displayed user count
+    const adjustedTotalUsers = Math.max(0, totalUsers - totalHiddenInBatch);
+
     const currentPage = Math.floor(offset / limit) + 1;
-    const totalPages = Math.ceil(totalUsers / limit);
+    const totalPages = Math.ceil(adjustedTotalUsers / limit);
 
     const handleSort = (field: string) => {
         if (sortBy === field) {
@@ -256,7 +308,6 @@ export default function AdminUsersPage() {
         );
     }
 
-    const users = usersData?.users || [];
 
     return (
         <div className="space-y-6">
@@ -295,21 +346,21 @@ export default function AdminUsersPage() {
                     </div>
                     <div className="flex items-center gap-2 justify-between sm:justify-end">
                         <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">Rows:</span>
-                        <select
-                            className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                            value={limit}
-                            onChange={(e) => {
-                                setLimit(Number(e.target.value));
-                                setOffset(0);
-                            }}
-                        >
-                            {[5, 10, 20, 50, 100].map((v) => (
-                                <option key={v} value={v}>
-                                    {v}
-                                </option>
-                            ))}
-                        </select>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Rows:</span>
+                            <select
+                                className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                value={limit}
+                                onChange={(e) => {
+                                    setLimit(Number(e.target.value));
+                                    setOffset(0);
+                                }}
+                            >
+                                {[5, 10, 20, 50, 100].map((v) => (
+                                    <option key={v} value={v}>
+                                        {v}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="ml-2">
                             <Plus className="mr-1 h-4 w-4" />
@@ -372,116 +423,93 @@ export default function AdminUsersPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    <>{
-                                        users
-                                            .filter((user) => {
-                                                if (user.id === currentUser?.id) return true;
-                                                const targetRole = user.role as keyof typeof rolePower || "user";
-                                                const targetPower = rolePower[targetRole] ?? 0;
+                                    users.map((user) => (
+                                        <tr key={user.id} className="hover:bg-muted/30 transition-colors">
+                                            <td className="px-3 py-4 sm:px-4">
+                                                <div className="flex items-center gap-2 sm:gap-3">
+                                                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+                                                        <AvatarImage src={user.image || ""} />
+                                                        <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="font-medium truncate">{user.name}</span>
+                                                        <span className="text-[10px] text-muted-foreground truncate sm:text-xs">{user.email}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-4 sm:px-4">
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.role === "admin"
+                                                    ? "bg-primary/10 text-primary"
+                                                    : user.role === "owner" || user.role === "super_owner"
+                                                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                                        : "bg-muted text-muted-foreground"
+                                                    }`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 py-4 sm:px-4">
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.banned
+                                                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                    : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                    }`}>
+                                                    {user.banned ? "Banned" : "Active"}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 py-4 text-right sm:px-4">
+                                                <div className="flex justify-end gap-2">
+                                                    {user.permissions.canPromoteToOwner && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            title={user.role === "owner" ? "Demote to User" : "Promote to owner"}
+                                                            onClick={() => handleSetRole(user.id, user.role as string, user.role === "owner" ? "admin" : "owner")}
+                                                        >
+                                                            {user.role === "owner" ? (
+                                                                <KeyRound className="h-4 w-4 text-amber-500" />
+                                                            ) : (
+                                                                <Key className="h-4 w-4 opacity-40" />
+                                                            )}
+                                                        </Button>
+                                                    )}
 
-                                                // Visibility Logic:
-                                                // user, admin (0, 1) -> seen by admin+ (power >= 1)
-                                                // owner, super_owner (2, 3) -> seen by super_owner (power >= 3)
-                                                if (targetPower <= 1) return currentPower >= 1;
-                                                if (targetPower >= 2) return currentPower >= 3;
-                                                return false;
-                                            })
-                                            .map((user) => (
-                                                <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                                                    <td className="px-3 py-4 sm:px-4">
-                                                        <div className="flex items-center gap-2 sm:gap-3">
-                                                            <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
-                                                                <AvatarImage src={user.image || ""} />
-                                                                <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
-                                                            </Avatar>
-                                                            <div className="flex flex-col min-w-0">
-                                                                <span className="font-medium truncate">{user.name}</span>
-                                                                <span className="text-[10px] text-muted-foreground truncate sm:text-xs">{user.email}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-3 py-4 sm:px-4">
-                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.role === "admin"
-                                                            ? "bg-primary/10 text-primary"
-                                                            : user.role === "owner" || user.role === "super_owner"
-                                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                                                : "bg-muted text-muted-foreground"
-                                                            }`}>
-                                                            {user.role}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-4 sm:px-4">
-                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.banned
-                                                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                                            : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                            }`}>
-                                                            {user.banned ? "Banned" : "Active"}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-4 text-right sm:px-4">
-                                                        <div className="flex justify-end gap-2">
-                                                            {(() => {
-                                                                const targetRole = user.role as keyof typeof rolePower || "user";
-                                                                const targetPower = rolePower[targetRole] ?? 0;
+                                                    {user.permissions.canChangeGeneralRole && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
+                                                            onClick={() => handleSetRole(user.id, user.role as string, user.role === "admin" ? "user" : "admin")}
+                                                        >
+                                                            {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                                                        </Button>
+                                                    )}
 
-                                                                // Action Logic:
-                                                                // super_owner can be acted on by none
-                                                                if (targetRole === 'super_owner') return null;
+                                                    {user.permissions.canBan && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className={user.banned ? "text-green-600 hover:text-green-700" : "text-amber-600 hover:text-amber-700"}
+                                                            title={user.banned ? "Unban User" : "Ban User"}
+                                                            onClick={() => handleBanUser(user.id, user.banned || false)}
+                                                        >
+                                                            {user.banned ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
+                                                        </Button>
+                                                    )}
 
-                                                                // target can be acted on by someone with strictly higher power
-                                                                if (currentPower >= targetPower + 1) {
-                                                                    return (
-                                                                        <>
-                                                                            {(currentUserRole === 'super_owner' && (user.role === 'owner' || user.role === 'admin')) && <Button
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                title={user.role === "owner" ? "Demote to User" : "Promote to owner"}
-                                                                                onClick={() => handleSetRole(user.id, user.role as string, user.role === "owner" ? "admin" : "owner")}
-                                                                            >
-                                                                                {user.role === "owner" ? (
-                                                                                    <KeyRound className="h-4 w-4 text-amber-500" />
-                                                                                ) : (
-                                                                                    <Key className="h-4 w-4 opacity-40" />
-                                                                                )}                                                                            </Button>}
-
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
-                                                                                onClick={() => handleSetRole(user.id, user.role as string, user.role === "admin" ? "user" : "admin")}
-                                                                            >
-                                                                                {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
-                                                                            </Button>
-
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                className={user.banned ? "text-green-600 hover:text-green-700" : "text-amber-600 hover:text-amber-700"}
-                                                                                title={user.banned ? "Unban User" : "Ban User"}
-                                                                                onClick={() => handleBanUser(user.id, user.banned || false)}
-                                                                            >
-                                                                                {user.banned ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
-                                                                            </Button>
-
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                className="text-red-600 hover:text-red-700"
-                                                                                title="Delete User"
-                                                                                onClick={() => handleDeleteUser(user.id)}
-                                                                            >
-                                                                                <Trash2 className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </>
-                                                                    );
-                                                                }
-                                                                return null;
-                                                            })()}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                    }</>
+                                                    {user.permissions.canDelete && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="text-red-600 hover:text-red-700"
+                                                            title="Delete User"
+                                                            onClick={() => handleDeleteUser(user.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
                                 )
                                 }
 
@@ -494,9 +522,9 @@ export default function AdminUsersPage() {
                             <div className="text-sm text-muted-foreground order-2 sm:order-1">
                                 Showing <span className="font-medium">{offset + 1}</span> to{" "}
                                 <span className="font-medium">
-                                    {Math.min(offset + limit, totalUsers)}
+                                    {Math.min(offset + limit, adjustedTotalUsers)}
                                 </span>{" "}
-                                of <span className="font-medium">{totalUsers}</span>
+                                of <span className="font-medium">{adjustedTotalUsers}</span>
                             </div>
                             <div className="flex items-center gap-1 order-1 sm:order-2">
                                 <Button
@@ -538,7 +566,7 @@ export default function AdminUsersPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={offset + limit >= totalUsers}
+                                    disabled={offset + limit >= adjustedTotalUsers}
                                     onClick={() => setOffset(offset + limit)}
                                     className="h-8 px-2 sm:px-3"
                                 >
