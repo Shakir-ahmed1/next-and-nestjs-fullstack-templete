@@ -8,18 +8,18 @@ export class OrganizationsAdminController {
     constructor(private orgService: OrganizationsService) { }
 
     @Get()
-    @Roles(['admin', 'owner'])
+    @Roles(['admin', 'owner', 'super_owner'])
     async getAll(@Session() session: UserSession) {
         return this.orgService.findAll();
     }
 
     @Delete(':id')
-    @Roles(['admin', 'owner'])
+    @Roles(['admin', 'owner', 'super_owner'])
     async delete(@Session() session: UserSession, @Param('id') id: string) {
         return this.orgService.delete(id);
     }
     @Put(':id')
-    @Roles(['admin', 'owner'])
+    @Roles(['admin', 'owner', 'super_owner'])
     async updateOrg(@Session() session: UserSession, @Param('id') id: string) {
         throw new InternalServerErrorException("Methode not implemented")
     }

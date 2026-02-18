@@ -269,18 +269,18 @@ export default function AdminUsersPage() {
                 </p>
             </div>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="relative max-w-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="relative w-full lg:max-w-sm">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder="Search by name..."
-                        className="pl-9"
+                        className="pl-9 w-full"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    <div className="flex items-center space-x-2 bg-muted/30 p-2 rounded-md sm:bg-transparent sm:p-0">
                         <Checkbox
                             id="confirm-disabled"
                             checked={confirmDisabled}
@@ -288,15 +288,16 @@ export default function AdminUsersPage() {
                         />
                         <Label
                             htmlFor="confirm-disabled"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            className="text-sm font-medium leading-none cursor-pointer whitespace-nowrap"
                         >
-                            Disable confirmation dialog
+                            Disable confirmation
                         </Label>
                     </div>
-                    <div className="flex items-center gap-2 ml-auto">
-                        <span className="text-sm text-muted-foreground">Rows per page:</span>
+                    <div className="flex items-center gap-2 justify-between sm:justify-end">
+                        <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">Rows:</span>
                         <select
-                            className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                             value={limit}
                             onChange={(e) => {
                                 setLimit(Number(e.target.value));
@@ -309,28 +310,30 @@ export default function AdminUsersPage() {
                                 </option>
                             ))}
                         </select>
+                        </div>
+                        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="ml-2">
+                            <Plus className="mr-1 h-4 w-4" />
+                            <span className="hidden xs:inline">Create User</span>
+                            <span className="xs:hidden">Create</span>
+                        </Button>
                     </div>
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create User
-                    </Button>
                 </div>
             </div>
 
-            <Card>
-                <CardHeader>
+            <Card className="overflow-hidden border-none sm:border">
+                <CardHeader className="px-4 py-4 sm:px-6">
                     <CardTitle>Users</CardTitle>
                     <CardDescription>
                         A list of all users in the system.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="relative overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <CardContent className="p-0 sm:p-6 sm:pt-0">
+                    <div className="relative w-full overflow-x-auto border-t sm:border-none">
+                        <table className="w-full text-left text-sm border-collapse">
+                            <thead className="bg-muted/50 text-[10px] uppercase text-muted-foreground sm:text-xs">
                                 <tr>
                                     <th
-                                        className="px-4 py-3 font-medium cursor-pointer hover:text-foreground transition-colors"
+                                        className="whitespace-nowrap px-3 py-3 font-medium cursor-pointer hover:text-foreground transition-colors sm:px-4"
                                         onClick={() => handleSort("name")}
                                     >
                                         <div className="flex items-center gap-1">
@@ -341,7 +344,7 @@ export default function AdminUsersPage() {
                                         </div>
                                     </th>
                                     <th
-                                        className="px-4 py-3 font-medium cursor-pointer hover:text-foreground transition-colors"
+                                        className="whitespace-nowrap px-3 py-3 font-medium cursor-pointer hover:text-foreground transition-colors sm:px-4"
                                         onClick={() => handleSort("role")}
                                     >
                                         <div className="flex items-center gap-1">
@@ -351,8 +354,8 @@ export default function AdminUsersPage() {
                                             ) : <ArrowUpDown className="h-3 w-3" />}
                                         </div>
                                     </th>
-                                    <th className="px-4 py-3 font-medium">Status</th>
-                                    <th className="px-4 py-3 font-medium text-right">Actions</th>
+                                    <th className="whitespace-nowrap px-3 py-3 font-medium sm:px-4">Status</th>
+                                    <th className="whitespace-nowrap px-3 py-3 font-medium text-right sm:px-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -385,20 +388,20 @@ export default function AdminUsersPage() {
                                             })
                                             .map((user) => (
                                                 <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                                                    <td className="px-4 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <Avatar className="h-9 w-9">
+                                                    <td className="px-3 py-4 sm:px-4">
+                                                        <div className="flex items-center gap-2 sm:gap-3">
+                                                            <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                                                                 <AvatarImage src={user.image || ""} />
                                                                 <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
                                                             </Avatar>
-                                                            <div className="flex flex-col">
-                                                                <span className="font-medium">{user.name}</span>
-                                                                <span className="text-xs text-muted-foreground">{user.email}</span>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="font-medium truncate">{user.name}</span>
+                                                                <span className="text-[10px] text-muted-foreground truncate sm:text-xs">{user.email}</span>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.role === "admin"
+                                                    <td className="px-3 py-4 sm:px-4">
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.role === "admin"
                                                             ? "bg-primary/10 text-primary"
                                                             : user.role === "owner" || user.role === "super_owner"
                                                                 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
@@ -407,15 +410,15 @@ export default function AdminUsersPage() {
                                                             {user.role}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.banned
+                                                    <td className="px-3 py-4 sm:px-4">
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.banned
                                                             ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                                             : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                                             }`}>
                                                             {user.banned ? "Banned" : "Active"}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-4 text-right">
+                                                    <td className="px-3 py-4 text-right sm:px-4">
                                                         <div className="flex justify-end gap-2">
                                                             {(() => {
                                                                 const targetRole = user.role as keyof typeof rolePower || "user";
@@ -487,35 +490,37 @@ export default function AdminUsersPage() {
                     </div>
 
                     {totalUsers > 0 && (
-                        <div className="flex items-center justify-between gap-4 border-t px-4 py-4">
-                            <div className="text-sm text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t px-4 py-4">
+                            <div className="text-sm text-muted-foreground order-2 sm:order-1">
                                 Showing <span className="font-medium">{offset + 1}</span> to{" "}
                                 <span className="font-medium">
                                     {Math.min(offset + limit, totalUsers)}
                                 </span>{" "}
-                                of <span className="font-medium">{totalUsers}</span> users
+                                of <span className="font-medium">{totalUsers}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 order-1 sm:order-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     disabled={offset === 0}
                                     onClick={() => setOffset(Math.max(0, offset - limit))}
+                                    className="h-8 px-2 sm:px-3"
                                 >
-                                    <ChevronLeft className="mr-1 h-4 w-4" />
-                                    Previous
+                                    <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                                    <span className="hidden sm:inline">Previous</span>
                                 </Button>
                                 <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        // Simple pagination logic to show current page and neighbors
+                                    {Array.from({ length: Math.min(currentPage > 3 ? 3 : 5, totalPages) }, (_, i) => {
                                         let pageNum = currentPage;
                                         if (totalPages <= 5) {
                                             pageNum = i + 1;
                                         } else {
                                             if (currentPage <= 3) pageNum = i + 1;
                                             else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                                            else pageNum = currentPage - 2 + i;
+                                            else pageNum = currentPage - 1 + i; // Show fewer on mobile
                                         }
+
+                                        if (pageNum > totalPages) return null;
 
                                         return (
                                             <Button
@@ -535,9 +540,10 @@ export default function AdminUsersPage() {
                                     size="sm"
                                     disabled={offset + limit >= totalUsers}
                                     onClick={() => setOffset(offset + limit)}
+                                    className="h-8 px-2 sm:px-3"
                                 >
-                                    Next
-                                    <ChevronRight className="ml-1 h-4 w-4" />
+                                    <span className="hidden sm:inline">Next</span>
+                                    <ChevronRight className="h-4 w-4 sm:ml-1" />
                                 </Button>
                             </div>
                         </div>

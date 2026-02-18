@@ -7,11 +7,13 @@ export const NEXT_PUBLIC_NODE_ENV = process.env.NEXT_PUBLIC_NODE_ENV
 export const dashboardPageUri = "/organizations"
 
 export const companyInfo = {
-    name: 'Twin-Commerce',
-    description: 'Twin-Commerce is a modern e-commerce platform with separated frontend and backend.',
-    slug: 'twin-commerce',
-    domain: 'twin-commerce.com',
-    email: 'support@twin-commerce.com',
+    name: 'Native PLC',
+    description: 'Native PLC is a modern ERP system.',
+    slug: 'native-plc',
+    domain: 'nativeplc.com',
+    email: 'support@nativeplc.com',
+    logo: '/native-logo-2.png',
+
 }
 // Port Configuration
 // export const NEXT_PUBLIC_BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '3000';

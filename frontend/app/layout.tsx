@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: companyInfo.name,
   description: companyInfo.description,
   icons: {
-    icon: '/native-logo-2.png',
+    icon: companyInfo.logo,
   },
 };
 

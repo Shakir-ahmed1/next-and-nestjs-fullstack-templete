@@ -23,20 +23,19 @@ export function DashboardHeader() {
   useEffect(() => setMounted(true), [])
 
   return (
-    <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur px-4 py-3 sticky  gap-7 top-0 z-50">
-      <div className="flex items-center gap-3">
+    <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur px-2 md:px-4 py-3 sticky top-0 z-50 gap-2 md:gap-7">
+      <div className="flex items-center gap-2 md:gap-3">
+        <SidebarTrigger className="md:hidden" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              size="lg"
-              className="w-auto px-2 hover:bg-accent hover:text-accent-foreground flex items-center gap-3 justify-start
-              min-w-50 max-w-100
-              md:min-w-100 
-              md:max-w-150
+              size="sm"
+              className="w-auto px-2 hover:bg-accent hover:text-accent-foreground flex items-center gap-2 md:gap-3 justify-start
+              min-w-fit max-w-[150px] md:max-w-none
               "
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shrink-0">
                 {activeOrg ? (
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={activeOrg.logo || undefined} />
@@ -48,16 +47,14 @@ export function DashboardHeader() {
                   <Building2 className="size-4" />
                 )}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <h1 className="text-2xl font-bold tracking-tight truncate">{activeOrg?.name || "Select Organization"}</h1>
+              <div className="grid flex-1 text-left text-sm leading-tight overflow-hidden">
+                <h1 className="text-sm md:text-xl font-bold tracking-tight truncate">{activeOrg?.name || "Select Org"}</h1>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4 shrink-0" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width]
-                          min-w-90 max-w-100
-              md:min-w-100 md:max-w-150"
+            className="w-[200px] md:w-[--radix-dropdown-menu-trigger-width]"
             align="start"
             side="bottom"
             sideOffset={4}
@@ -71,7 +68,7 @@ export function DashboardHeader() {
                 onClick={() => handleSetActiveOrg(org.slug)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
+                <div className="flex size-6 items-center justify-center rounded-sm border shrink-0">
                   <Avatar className="h-4 w-4 rounded-sm">
                     <AvatarImage src={org.logo || undefined} />
                     <AvatarFallback className="text-[10px]">
@@ -79,7 +76,7 @@ export function DashboardHeader() {
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight truncate">{org.name}</h1>
+                <span className="truncate font-medium">{org.name}</span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
@@ -96,17 +93,17 @@ export function DashboardHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="relative hidden md:block">
+      <div className="flex items-center gap-1 md:gap-3">
+        <div className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="search"
             placeholder="Search..."
-            className="pl-10 pr-4 py-2 rounded-lg border bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary w-64"
+            className="pl-10 pr-4 py-2 rounded-lg border bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary w-40 xl:w-64"
           />
         </div>
 
-        <Button variant="ghost" size="icon" >
+        <Button variant="ghost" size="icon" className="h-9 w-9">
           <Link href="/notifications" aria-label="Notifications">
             <Bell className="h-5 w-5" />
           </Link>
@@ -115,6 +112,7 @@ export function DashboardHeader() {
         <Button
           variant="ghost"
           size="icon"
+          className="h-9 w-9"
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           title="Toggle theme"
         >

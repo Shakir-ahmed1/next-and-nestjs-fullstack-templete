@@ -48,6 +48,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Fragment } from "react/jsx-runtime";
 import { canAccessAdminPage } from "@/lib/admin-helpers";
+import { companyInfo } from "@/config";
 
 const menuItems = [
   { title: "Organizations", icon: Building2, href: "/organizations" },
@@ -82,7 +83,7 @@ const menuItems = [
 export function AppSidebar() {
   const { data: user, isLoading } = useUserProfile();
   const { hasMemberPermission } = useMemberPermissions();
-  const { state, toggleSidebar } = useSidebar()
+  const { state, toggleSidebar, isMobile } = useSidebar()
   const isCollapsed = state === "collapsed"
 
 
@@ -96,58 +97,37 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarHeader className="border-b">
-
-
-
-          {/* <SidebarMenu>
-              <SidebarMenuItem>
-              <SidebarTrigger></SidebarTrigger>
-              <SidebarGroupLabel className="text-lg font-semibold">
-                Native
-              </SidebarGroupLabel>
-
-            </SidebarMenu> */}
           <SidebarMenuItem className="list-none">
-            {/* We use a div instead of SidebarMenuButton as the wrapper 
-      to avoid the 'asChild' single-element restriction.
-    */}
-            <div className="group relative flex h-12 justify-between items-center px-2">
-
-              {/* 1. THE LOGO & TEXT AREA */}
-              <>
+            <div className={`group relative flex h-12 items-center px-2 ${isCollapsed && !isMobile ? "justify-center" : "justify-between"}`}>
+              {/* <div className="flex items-center gap-2"> */}
                 <Link
                   href="/"
-                  className={`flex items-center gap-2 transition-opacity duration-200 ${isCollapsed ? "group-hover:opacity-0" : "opacity-100"
-                    }`}
+                  className={`flex items-center gap-2 ${isCollapsed && !isMobile ? "flex" : "flex"}`}
                 >
-                  <Image src="/native-logo-2.png" alt="Logo" width={24} height={24} className="shrink-0" />
-                  {state === "expanded" && (
-                    <span className="font-semibold whitespace-nowrap">Native PLC</span>
+                  <Image src={companyInfo.logo} alt="Logo" width={24} height={24} className="shrink-0" />
+                  {(state === "expanded" || isMobile) && (
+                    <span className="font-semibold whitespace-nowrap">{companyInfo.name}</span>
                   )}
                 </Link>
+              {/* </div> */}
 
-                {/* 2. THE COLLAPSED HOVER TRIGGER */}
-                {isCollapsed && (
-                  <button
-                    onClick={toggleSidebar}
-                    className="absolute h-6 w-6 flex items-center justify-center rounded-md border bg-background opacity-0 transition-opacity group-hover:opacity-100 hover:bg-accent"
-                    title="Expand Sidebar"
-                  >
-                    <PanelLeft className="h-4 w-4" />
-                  </button>
-                )}
-              </>
-
-              {/* 3. THE EXPANDED TRIGGER (Standard shadcn position) */}
-              {!isCollapsed && (
-                <Fragment >
-                  <SidebarTrigger className="h-6 w-6" />
-                </Fragment>
+              {/* Toggle Trigger - Show simplified on mobile or when expanded on desktop */}
+              {(state === "expanded" || isMobile) && (
+                <SidebarTrigger className="h-6 w-6" />
               )}
 
+              {/* Desktop Collapsed Hover Trigger */}
+              {isCollapsed && !isMobile && (
+                <button
+                  onClick={toggleSidebar}
+                  className="absolute h-6 w-6 flex items-center justify-center rounded-md border bg-background opacity-0 transition-opacity group-hover:opacity-100 hover:bg-accent"
+                  title="Expand Sidebar"
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </button>
+              )}
             </div>
-          </SidebarMenuItem>          {/* </SidebarMenuItem> */}
-
+          </SidebarMenuItem>
         </SidebarHeader>
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold">
