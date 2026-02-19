@@ -10,6 +10,7 @@ import { customMemberAC, customMemberRoles } from "./auth-member-permissions";
 import { typeormAdapter } from "./typeorm-adapter-auth";
 import { customUserAc, customUserRoles } from "./auth-user-permissions";
 import { databaseHooks } from "./auth-hooks";
+import { UserAdminRoles } from "./admin-helpers";
 
 const logger = new Logger('BetterAuth');
 
@@ -20,9 +21,11 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
             configService.get('PUBLIC_URL', ''),
             `http://localhost:${configService.get('FRONTEND_PORT')}`,
         ],
-        database: typeormAdapter(dataSource, {
-            softDeleteEnabledEntities: ['user', 'member', 'organization'],
-        }),
+        database: typeormAdapter(dataSource,
+            //  {
+            //     softDeleteEnabledEntities: ['user', 'member', 'organization'],
+            // }
+        ),
         databaseHooks,
         emailAndPassword: {
             enabled: true,
@@ -56,7 +59,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
             admin({
                 ac: customUserAc,
                 roles: customUserRoles,
-                adminRole: ["admin", "owner", "super_owner"],
+                adminRole: UserAdminRoles,
             }),
             organization({
                 ac: customMemberAC,
@@ -69,7 +72,7 @@ export const getBetterAuthConfig = (configService: ConfigService, dataSource: Da
                 // Creating an organization creator role by default
                 creatorRole: "owner",
                 allowUserToCreateOrganization: async (user) => {
-                    return ["admin", "owner", "super_owner"].includes(user.role)
+                    return UserAdminRoles.includes(user.role)
                 },
 
             }),

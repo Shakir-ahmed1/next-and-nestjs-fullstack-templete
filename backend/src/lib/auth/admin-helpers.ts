@@ -3,8 +3,8 @@ export const UserRoles = {
     admin: 'admin',
     owner: 'owner',
     super_owner: 'super_owner',
-} as const;
-export type UserRole = keyof typeof UserRoles
+}
+
 export const UserAdminRoles = [UserRoles.admin, UserRoles.owner, UserRoles.super_owner]
 
 export const UserRoleRanks: Record<string, number> = {
@@ -13,8 +13,3 @@ export const UserRoleRanks: Record<string, number> = {
     owner: 2,
     super_owner: 3,
 };
-
-
-export const canAccessAdminPage = (role: UserRole) => {
-    return UserAdminRoles.includes(role as any)
-}

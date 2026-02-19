@@ -1,24 +1,19 @@
 import { APIError, BetterAuthOptions, GenericEndpointContext, User } from "better-auth"; // Adjust import based on your setup
+import { UserRoleRanks, UserRoles } from "./admin-helpers";
 
 // 1. Define the role hierarchy using a numeric rank
-const ROLE_RANKS: Record<string, number> = {
-    user: 0,
-    admin: 1,
-    owner: 2,
-    super_owner: 3,
-};
 
 // 2. Helper function to check permissions based on your requirements
 function isActionAllowed(actorRole: string, targetRole: string, newRole?: string): boolean {
     // super_owner can be acted on by none (even themselves)
-    if (targetRole === "super_owner") {
+    if (targetRole === UserRoles.super_owner) {
         return false;
     }
-    const actorRank = ROLE_RANKS[actorRole] || 0;
-    const targetRank = ROLE_RANKS[targetRole] || 0;
+    const actorRank = UserRoleRanks[actorRole] || 0;
+    const targetRank = UserRoleRanks[targetRole] || 0;
 
     if (newRole) {
-        const newRoleRank = ROLE_RANKS[newRole] || 0;
+        const newRoleRank = UserRoleRanks[newRole] || 0;
         if (newRoleRank > actorRank) {
             return false;
         }
@@ -50,7 +45,7 @@ export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
                             where: [{ field: 'id', operator: 'eq', value: targetUserId as string }]
                         });
 
-                        const targetRole = targetUser?.role || "user";
+                        const targetRole = targetUser?.role || UserRoles.user;
 
                         // Check if the actor has permission to delete the target
                         if (!isActionAllowed(actorRole, targetRole)) {
@@ -103,4 +98,5 @@ export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
             },
         },
     },
+
 };

@@ -46,6 +46,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { rolePower } from "@/components/auth/user-permission-guard";
+import { UserRole, UserRoles } from "@/lib/admin-helpers";
 
 export default function AdminUsersPage() {
     const [limit, setLimit] = useState(10);
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
     const [isCreatingUser, setIsCreatingUser] = useState(false);
     const session = authClient.useSession();
     const currentUser = session.data?.user;
-    const currentUserRole = currentUser?.role as keyof typeof rolePower || "user";
+    const currentUserRole = currentUser?.role as UserRole || UserRoles.admin;
     const currentPower = rolePower[currentUserRole] ?? 0;
 
     useEffect(() => {
@@ -108,7 +109,7 @@ export default function AdminUsersPage() {
         // filter out users that the current user cannot see
         const filtered = usersData.users.filter((user) => {
             if (user.id === currentUser.id) return true;
-            const targetRole = user.role as keyof typeof rolePower || "user";
+            const targetRole = user.role as UserRole || UserRoles.admin;
             const targetPower = rolePower[targetRole] ?? 0;
 
             // Visibility Logic:
@@ -120,12 +121,12 @@ export default function AdminUsersPage() {
         });
 
         const mapped = filtered.map((user) => {
-            const targetRole = user.role as keyof typeof rolePower || "user";
+            const targetRole = user.role as UserRole || UserRoles.admin;
             const roleValue = rolePower[targetRole] ?? 0;
 
             // Action Logic:
             // super_owner can be acted on by none
-            const isSuperOwner = user.role === 'super_owner';
+            const isSuperOwner = user.role === UserRoles.super_owner;
             // target can be acted on by someone with strictly higher power
             const canManage = !isSuperOwner && currentPower >= roleValue + 1;
 
@@ -135,8 +136,8 @@ export default function AdminUsersPage() {
                     canBan: canManage,
                     canDelete: canManage,
                     canChangeGeneralRole: canManage,
-                    canPromoteToOwner: currentUserRole === 'super_owner' && (user.role === 'owner' || user.role === 'admin'),
-                    canPromoteToAdmin: canManage && user.role !== "admin",
+                    canPromoteToOwner: currentUserRole === UserRoles.super_owner && (user.role === UserRoles.owner || user.role === UserRoles.admin),
+                    canPromoteToAdmin: canManage && user.role !== UserRoles.admin,
                 }
             };
         });
@@ -200,7 +201,7 @@ export default function AdminUsersPage() {
             setActionToConfirm({
                 type: isBanned ? "unban" : "ban",
                 userId,
-                userName: user?.name || "User",
+                userName: user?.name || UserRoles.admin,
             });
             return;
         }
@@ -237,7 +238,7 @@ export default function AdminUsersPage() {
             setActionToConfirm({
                 type: "delete",
                 userId,
-                userName: user?.name || "User",
+                userName: user?.name || UserRoles.admin,
             });
             return;
         }
@@ -255,14 +256,14 @@ export default function AdminUsersPage() {
         }
     };
 
-    const handleSetRole = async (userId: string, currentRole: string, newRole: "user" | "admin" | "super_owner" | "owner", skipConfirm = false) => {
+    const handleSetRole = async (userId: string, currentRole: UserRole, newRole: UserRole, skipConfirm = false) => {
 
         if (!confirmDisabled && !skipConfirm) {
             const user = users.find(u => u.id === userId);
             setActionToConfirm({
                 type: "role",
                 userId,
-                userName: user?.name || "User",
+                userName: user?.name || UserRoles.admin,
                 data: { currentRole, newRole }
             });
             return;
@@ -438,9 +439,9 @@ export default function AdminUsersPage() {
                                                 </div>
                                             </td>
                                             <td className="px-3 py-4 sm:px-4">
-                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.role === "admin"
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:py-1 sm:text-xs ${user.role === UserRoles.admin
                                                     ? "bg-primary/10 text-primary"
-                                                    : user.role === "owner" || user.role === "super_owner"
+                                                    : user.role === UserRoles.owner || user.role === UserRoles.super_owner
                                                         ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                                                         : "bg-muted text-muted-foreground"
                                                     }`}>
@@ -461,10 +462,12 @@ export default function AdminUsersPage() {
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            title={user.role === "owner" ? "Demote to User" : "Promote to owner"}
-                                                            onClick={() => handleSetRole(user.id, user.role as string, user.role === "owner" ? "admin" : "owner")}
+                                                            title={user.role === UserRoles.owner ? "Demote to User" : "Promote to owner"}
+                                                            onClick={() => handleSetRole(user.id, user.role as UserRole,
+                                                                user.role === UserRoles.owner ? UserRoles.admin : UserRoles.owner
+                                                            )}
                                                         >
-                                                            {user.role === "owner" ? (
+                                                            {user.role === UserRoles.owner ? (
                                                                 <KeyRound className="h-4 w-4 text-amber-500" />
                                                             ) : (
                                                                 <Key className="h-4 w-4 opacity-40" />
@@ -476,10 +479,10 @@ export default function AdminUsersPage() {
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            title={user.role === "admin" ? "Demote to User" : "Promote to Admin"}
-                                                            onClick={() => handleSetRole(user.id, user.role as string, user.role === "admin" ? "user" : "admin")}
+                                                            title={user.role === UserRoles.admin ? "Demote to User" : "Promote to Admin"}
+                                                            onClick={() => handleSetRole(user.id, user.role as UserRole, user.role === UserRoles.admin ? UserRoles.user : UserRoles.admin)}
                                                         >
-                                                            {user.role === "admin" ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                                                            {user.role === UserRoles.admin ? <ShieldAlert className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
                                                         </Button>
                                                     )}
 

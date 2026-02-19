@@ -2,12 +2,13 @@
 
 import React from "react";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { UserRole, UserRoles } from "@/lib/admin-helpers";
 interface UserPermissionGuardProps {
     permissions?: any;
     children: React.ReactNode;
     condition?:  '>' | '<' | '==' | '>= ' | '<=' | '!=';
     fallback?: React.ReactNode;
-    targetRole?: 'user' | 'admin' | 'owner' | 'super_owner';
+    targetRole?: UserRole;
     targetValue?: number;
 }
 

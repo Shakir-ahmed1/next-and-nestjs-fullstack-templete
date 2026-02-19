@@ -63,7 +63,6 @@ export const customUserRoles = {
     admin: adminRole,
     user: userRole,
 };
-
 /**
  * 3. GET BETTER-AUTH CONFIG
  */
