@@ -48,7 +48,7 @@ step 3: `cd frontend; set -a; source ../.env.development.local; set +a; npm run 
 
 
 #### to open in with a full dockerized develpment
-command: `set -a; source .env.development; set +a; docker compose -f docker-compose.dev.yml --env-file .env.development up -d;`
+command: `docker compose -f docker-compose.dev.yml --env-file .env.development up -d;`
 
 #### to stop the dockerized develpment
 command: `docker compose -f docker-compose.dev.yml --env-file .env.development down;`
